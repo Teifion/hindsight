@@ -68,8 +68,11 @@ config :phoenix, :plug_init_mode, :runtime
 
 # Configure your database
 config :hindsight, Hindsight.Repo,
-  username: "postgres",
-  password: "postgres",
-  database: "hindsight_dev",
+  username: "centaur_dev",
+  password: "123456789",
+  database: "centaur_dev",
   hostname: "localhost",
-  pool_size: 10
+  pool_size: 10,
+  timeout: 60_000 * 30,
+  pool_timeout: 60_000 * 30,
+  ownership_timeout: 60_000 * 30

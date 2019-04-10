@@ -2,7 +2,7 @@ defmodule Hindsight.Repo.Migrations.CreateTemplates do
   use Ecto.Migration
 
   def change do
-    create table(:templates) do
+    create table(:hindsight_templates) do
       add :name, :string, null: false
       add :description, :string
       add :options, :map
