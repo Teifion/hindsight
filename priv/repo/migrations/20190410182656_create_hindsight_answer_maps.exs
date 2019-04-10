@@ -3,7 +3,7 @@ defmodule Hindsight.Repo.Migrations.CreateHindsightAnswerMaps do
 
   def change do
     create table(:hindsight_answer_maps) do
-      add :value, :map
+      add :value, :map, null: false
       add :form_id, references(:hindsight_forms, on_delete: :nothing)
       add :question_id, references(:hindsight_questions, on_delete: :nothing)
 

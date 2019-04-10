@@ -3,12 +3,12 @@ defmodule Hindsight.Repo.Migrations.CreateHindsightQuestions do
 
   def change do
     create table(:hindsight_questions) do
-      add :label, :string
+      add :label, :string, null: false
       add :description, :string
       add :visible, :boolean, default: false, null: false
       add :options, :map
-      add :ordering, :integer
-      add :question_type, :string
+      add :ordering, :integer, null: false
+      add :question_type, :string, null: false
       add :template_id, references(:hindsight_templates, on_delete: :nothing)
 
       timestamps()

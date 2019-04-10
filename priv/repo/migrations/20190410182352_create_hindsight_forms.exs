@@ -3,7 +3,7 @@ defmodule Hindsight.Repo.Migrations.CreateHindsightForms do
 
   def change do
     create table(:hindsight_forms) do
-      add :reference, :string
+      add :reference, :string, null: false
       add :completed, :boolean, default: false, null: false
       add :completed_at, :naive_datetime
       add :score, :integer

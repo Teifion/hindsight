@@ -17,6 +17,10 @@ defmodule HindsightWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :index
+    
+    resources "/templates", TemplateController, only: [:index, :create, :edit, :delete, :update, :new]
+    resources "/forms", FormController
+    resources "/questions", QuestionController, only: [:create, :edit, :update, :delete]
   end
 
   # Other scopes may use custom stacks.
