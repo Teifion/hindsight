@@ -1,0 +1,26 @@
+<h1>Listing Hindsight answers</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Value</th>
+
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+<%= for answer <- @hindsight_answers do %>
+    <tr>
+      <td><%= answer.value %></td>
+
+      <td>
+        <%= link "Show", to: Routes.answer_path(@conn, :show, answer) %>
+        <%= link "Edit", to: Routes.answer_path(@conn, :edit, answer) %>
+        <%= link "Delete", to: Routes.answer_path(@conn, :delete, answer), method: :delete, data: [confirm: "Are you sure?"] %>
+      </td>
+    </tr>
+<% end %>
+  </tbody>
+</table>
+
+<span><%= link "New Answer", to: Routes.answer_path(@conn, :new) %></span>

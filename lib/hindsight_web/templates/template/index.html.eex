@@ -1,0 +1,40 @@
+<h1>Listing Templates</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Description</th>
+      <th>Options</th>
+      <th>Colour</th>
+      <th>Icon</th>
+      <th>Enabled</th>
+      <th>Use score</th>
+      <th>Max score</th>
+
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+<%= for template <- @templates do %>
+    <tr>
+      <td><%= template.name %></td>
+      <td><%= template.description %></td>
+      <td><%= template.options %></td>
+      <td><%= template.colour %></td>
+      <td><%= template.icon %></td>
+      <td><%= template.enabled %></td>
+      <td><%= template.use_score %></td>
+      <td><%= template.max_score %></td>
+
+      <td>
+        <%= link "Show", to: Routes.template_path(@conn, :show, template) %>
+        <%= link "Edit", to: Routes.template_path(@conn, :edit, template) %>
+        <%= link "Delete", to: Routes.template_path(@conn, :delete, template), method: :delete, data: [confirm: "Are you sure?"] %>
+      </td>
+    </tr>
+<% end %>
+  </tbody>
+</table>
+
+<span><%= link "New Template", to: Routes.template_path(@conn, :new) %></span>

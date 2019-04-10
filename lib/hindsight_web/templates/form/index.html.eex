@@ -1,0 +1,32 @@
+<h1>Listing Hindsight forms</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Reference</th>
+      <th>Completed</th>
+      <th>Completed at</th>
+      <th>Score</th>
+
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+<%= for form <- @hindsight_forms do %>
+    <tr>
+      <td><%= form.reference %></td>
+      <td><%= form.completed %></td>
+      <td><%= form.completed_at %></td>
+      <td><%= form.score %></td>
+
+      <td>
+        <%= link "Show", to: Routes.form_path(@conn, :show, form) %>
+        <%= link "Edit", to: Routes.form_path(@conn, :edit, form) %>
+        <%= link "Delete", to: Routes.form_path(@conn, :delete, form), method: :delete, data: [confirm: "Are you sure?"] %>
+      </td>
+    </tr>
+<% end %>
+  </tbody>
+</table>
+
+<span><%= link "New Form", to: Routes.form_path(@conn, :new) %></span>

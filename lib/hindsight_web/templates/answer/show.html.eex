@@ -1,0 +1,13 @@
+<h1>Show Answer</h1>
+
+<ul>
+
+  <li>
+    <strong>Value:</strong>
+    <%= @answer.value %>
+  </li>
+
+</ul>
+
+<span><%= link "Edit", to: Routes.answer_path(@conn, :edit, @answer) %></span>
+<span><%= link "Back", to: Routes.answer_path(@conn, :index) %></span>

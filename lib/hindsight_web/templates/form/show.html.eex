@@ -1,0 +1,28 @@
+<h1>Show Form</h1>
+
+<ul>
+
+  <li>
+    <strong>Reference:</strong>
+    <%= @form.reference %>
+  </li>
+
+  <li>
+    <strong>Completed:</strong>
+    <%= @form.completed %>
+  </li>
+
+  <li>
+    <strong>Completed at:</strong>
+    <%= @form.completed_at %>
+  </li>
+
+  <li>
+    <strong>Score:</strong>
+    <%= @form.score %>
+  </li>
+
+</ul>
+
+<span><%= link "Edit", to: Routes.form_path(@conn, :edit, @form) %></span>
+<span><%= link "Back", to: Routes.form_path(@conn, :index) %></span>
