@@ -1,4 +1,4 @@
-defmodule HindsightWeb.FormController do
+defmodule HindsightWeb.Core.FormController do
   use HindsightWeb, :controller
 
   alias Hindsight.Core

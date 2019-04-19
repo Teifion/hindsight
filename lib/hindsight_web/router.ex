@@ -18,9 +18,9 @@ defmodule HindsightWeb.Router do
 
     get "/", PageController, :index
     
-    resources "/templates", TemplateController, only: [:index, :create, :edit, :delete, :update, :new]
-    resources "/forms", FormController
-    resources "/questions", QuestionController, only: [:create, :edit, :update, :delete]
+    resources "/templates", Core.TemplateController, only: [:index, :create, :edit, :delete, :update, :new]
+    resources "/forms", Core.FormController
+    resources "/questions", Core.QuestionController, only: [:create, :edit, :update, :delete]
   end
 
   # Other scopes may use custom stacks.

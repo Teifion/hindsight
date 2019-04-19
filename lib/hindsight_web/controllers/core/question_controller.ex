@@ -1,4 +1,4 @@
-defmodule HindsightWeb.QuestionController do
+defmodule HindsightWeb.Core.QuestionController do
   use HindsightWeb, :controller
 
   alias Hindsight.Core

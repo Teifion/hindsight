@@ -1,4 +1,4 @@
-defmodule HindsightWeb.TemplateController do
+defmodule HindsightWeb.Core.TemplateController do
   use HindsightWeb, :controller
 
   alias Hindsight.Core
