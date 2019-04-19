@@ -13,7 +13,7 @@ defmodule HindsightWeb.Router do
     plug :accepts, ["json"]
   end
 
-  scope "/", HindsightWeb, as: :hindsight do
+  scope "/", HindsightWeb do
     pipe_through :browser
 
     get "/", PageController, :index

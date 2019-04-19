@@ -2,7 +2,7 @@ defmodule Hindsight.Core.Template do
   use Ecto.Schema
   import Ecto.Changeset
 
-  schema "templates" do
+  schema "hindsight_templates" do
     field :colour, :string
     field :description, :string
     field :enabled, :boolean, default: false

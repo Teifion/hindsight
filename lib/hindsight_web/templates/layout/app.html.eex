@@ -23,11 +23,11 @@
       <p class="alert alert-danger" role="alert"><%= get_flash(@conn, :error) %></p>
       
       <div style="padding: 5px 0;">
-        <a href="<%= Routes.hindsight_template_path(@conn, :index) %>" class="btn btn-secondary">
+        <a href="<%= Routes.template_path(@conn, :index) %>" class="btn btn-secondary">
           Templates
         </a>
         
-        <a href="<%= Routes.hindsight_form_path(@conn, :index) %>" class="btn btn-secondary">
+        <a href="<%= Routes.form_path(@conn, :index) %>" class="btn btn-secondary">
           Forms
         </a>
       </div>
