@@ -1,0 +1,94 @@
+<table class="table table-striped table-sm" id="questions">
+  <thead>
+    <tr>
+      <th>Question</th>
+      
+      <th>Type</th>
+      
+      <th colspan="2">Options</th>
+      <th>&nbsp;</th>
+    </tr>
+  </thead>
+  <tbody>
+    <form action="<%= Routes.question_path(@conn, :create) %>" method="post" class="form-horizontal">
+      <input type="hidden" name="_csrf_token" value="<%= get_csrf_token() %>" />
+      <input type="hidden" name="question[template_id]" value="<%= @template.id %>" placeholder="" class="form-control" />
+      
+      <td>
+        <input type="text" name="question[label]" id="question_label" value="" placeholder="Question label" class="form-control" autocomplete="off"/>
+      </td>
+      
+      <td colspan="3">
+        <%= select :question, :question_type, @question_types, class: "form-control", selected: "Small text" %>
+      </td>
+      
+      <td>
+        <input type="submit" value="Add question" class="btn btn-primary btn-block" />
+      </td>
+    </form>
+    <tr>
+      <td colspan="5">&nbsp;</td>
+    </tr>
+    
+    <%= for q <- @template.questions do %>
+      <tr class="<%= if not q.visible, do: 'invisible-question' %>">
+        
+        <td style="min-width: 200px;">
+          <%= if q.question_type == "Header" do %>
+            ###
+          <% end %>
+          <%= q.label |> String.slice(0..60) %>
+        </td>
+        
+        <td style="min-width: 90px;"><%= q.question_type %></td>
+        
+        <td style="width: 30px;">
+          <%= if q.options["required"] do %>
+            R
+          <% else %>
+            &nbsp;
+          <% end %>
+        </td>
+        
+        <td style="width: 30px;">
+          <%= if not q.visible do %>
+            <i class="far fa-fw fa-eye-slash fa-lg"></i>
+          <% else %>
+            &nbsp;
+          <% end %>
+        </td>
+        
+        <td>
+          <a href="<%= Routes.question_path(@conn, :edit, q) %>" class="btn btn-block btn-secondary btn-sm">
+            <i class="fa fa-wrench fa-fw"></i>
+            Edit
+          </a>
+        </td>
+      </tr>
+    <% end %>
+    <tr>
+      <td colspan="5">&nbsp;</td>
+    </tr>
+    
+    <tr>
+      <form action="<%= Routes.question_path(@conn, :create) %>" method="post" class="form-horizontal">
+        <input type="hidden" name="_csrf_token" value="<%= get_csrf_token() %>" />
+        <input type="hidden" name="question[template_id]" value="<%= @template.id %>" placeholder="" class="form-control" />
+        
+        <td>
+          <input type="text" name="question[label]" value="" placeholder="Question label" class="form-control" autocomplete="off"/>
+        </td>
+        
+        <td colspan="3">
+          <%= select :question, :question_type, @question_types, class: "form-control", selected: "Small text" %>
+        </td>
+        
+        <td>
+          <input type="submit" value="Add question" class="btn btn-primary btn-block" />
+        </td>
+        
+      </form>
+    </tr>
+    
+  </tbody>
+</table>

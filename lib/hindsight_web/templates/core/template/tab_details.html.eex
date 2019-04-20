@@ -1,0 +1,6 @@
+<br />
+<%=
+  render "form.html", Map.merge(assigns, %{
+    action: Routes.template_path(@conn, :update, @template)
+  })
+%>

@@ -1,40 +1,64 @@
-<h1>Listing Templates</h1>
+<a href="<%= Routes.template_path(@conn, :new) %>" class="btn btn-primary">New template</a>
+<hr />
 
-<table>
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Description</th>
-      <th>Options</th>
-      <th>Colour</th>
-      <th>Icon</th>
-      <th>Enabled</th>
-      <th>Use score</th>
-      <th>Max score</th>
+<div class="row section-menu">
+  <div class="col-md-12">
+    <div class="card border-primary">
+      <div class="card-body">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th colspan="2">Name</th>
+              <th>Description</th>
+              <th>Enabled</th>
+              
+              <th colspan="2"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <%= for template <- @templates do %>
+              <%
+                # c = Hindsight.ColourLib.new(template.colour)
+                
+                # rgba = c |> Hindsight.ColourLib.as_css_style(0.075)
+                # rgb = c |> Hindsight.ColourLib.as_css_style()
+                
+                c = ""
+                rgba = ""
+                rgb = ""
+              %>
+            
+              <tr>
+                <td style="background-color: <%= rgb %>; color: #FFF;">
+                  <%= component "icon", icon: template.icon, class: "fa-lg" %>
+                </td>
+                <td style="background-color: <%= rgba %>;"><%= template.name %></td>
+                <td><%= template.description %></td>
+                <td>
+                  <%= if template.enabled do %>
+                    <i class='far fa-fw fa-check'></i>
+                  <% end %>
+                </td>
 
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-<%= for template <- @templates do %>
-    <tr>
-      <td><%= template.name %></td>
-      <td><%= template.description %></td>
-      <td><%= template.options %></td>
-      <td><%= template.colour %></td>
-      <td><%= template.icon %></td>
-      <td><%= template.enabled %></td>
-      <td><%= template.use_score %></td>
-      <td><%= template.max_score %></td>
-
-      <td>
-        <%= link "Show", to: Routes.template_path(@conn, :show, template) %>
-        <%= link "Edit", to: Routes.template_path(@conn, :edit, template) %>
-        <%= link "Delete", to: Routes.template_path(@conn, :delete, template), method: :delete, data: [confirm: "Are you sure?"] %>
-      </td>
-    </tr>
-<% end %>
-  </tbody>
-</table>
-
-<span><%= link "New Template", to: Routes.template_path(@conn, :new) %></span>
+                <td>
+                  <a href="<%= Routes.template_path(@conn, :edit, template) %>" class= "btn btn-secondary btn-sm">
+                    <i class="far fa-fw fa-wrench"></i>
+                    Edit
+                  </a>
+                </td>
+                
+                <td>
+                  <a href="<%= Routes.template_path(@conn, :edit, template) %>#questions_tab" class= "btn btn-secondary btn-sm">
+                    <i class="far fa-fw fa-question"></i>
+                    Questions
+                  </a>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+  </div>
+</div>

@@ -20,6 +20,30 @@ defmodule Hindsight.Core do
   def list_templates do
     Repo.all(Template)
   end
+  
+  def get_template_joins!(id) do
+    _template_query()
+    |> _template_preload(:questions)
+    |> _search(:id, id)
+    |> Repo.one!
+  end
+  
+  def _search(query, :id, id) do
+    from templates in query,
+      where: templates.id == ^id
+  end
+  
+  def _template_query() do
+    from templates in Template
+  end
+  
+  def _template_preload(query, :questions) do
+    from templates in query,
+      left_join: questions in assoc(templates, :questions),
+      preload: [questions: questions],
+      order_by: [asc: questions.ordering],
+      order_by: [asc: questions.label]
+  end
 
   @doc """
   Gets a single template.

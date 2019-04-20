@@ -34,10 +34,15 @@ defmodule HindsightWeb do
         namespace: HindsightWeb
 
       # Import convenience functions from controllers
-      import Phoenix.Controller, only: [get_flash: 1, get_flash: 2, view_module: 1]
+      import Phoenix.Controller, only: [get_csrf_token: 0, get_flash: 1, get_flash: 2, view_module: 1]
 
       # Use all HTML functionality (forms, tags, etc)
       use Phoenix.HTML
+
+      import Hindsight.Helpers.StringHelper
+      import Hindsight.Helpers.InputHelper
+      import Hindsight.Helpers.ComponentHelper
+      import Hindsight.Helpers.TimexHelper
 
       import HindsightWeb.ErrorHelpers
       import HindsightWeb.Gettext

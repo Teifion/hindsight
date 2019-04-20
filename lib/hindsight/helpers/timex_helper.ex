@@ -1,4 +1,4 @@
-defmodule Hindsight.Helpers.TimexHelpers do
+defmodule Hindsight.Helpers.TimexHelper do
   def convert(timestamp, tz \\ Timex.Timezone.Local.lookup()) do
     new_timestamp = timestamp |> Timex.Timezone.convert(tz)
     

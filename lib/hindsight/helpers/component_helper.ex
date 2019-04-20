@@ -1,4 +1,4 @@
-defmodule Hindsight.ComponentHelpers do
+defmodule Hindsight.Helpers.ComponentHelper do
   # http://blog.danielberkompas.com/2017/01/17/reusable-templates-in-phoenix.html
   # 
   # Example usage:

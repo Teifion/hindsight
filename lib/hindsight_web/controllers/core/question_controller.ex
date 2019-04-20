@@ -3,26 +3,41 @@ defmodule HindsightWeb.Core.QuestionController do
 
   alias Hindsight.Core
   alias Hindsight.Core.Question
-
-  def index(conn, _params) do
-    hindsight_questions = Core.list_hindsight_questions()
-    render(conn, "index.html", hindsight_questions: hindsight_questions)
-  end
-
-  def new(conn, _params) do
-    changeset = Core.change_question(%Question{})
-    render(conn, "new.html", changeset: changeset)
-  end
+  alias Hindsight.Core.QuestionLib
 
   def create(conn, %{"question" => question_params}) do
+    preset = question_params["question_type"]
+    |> String.slice(0, 8)
+    == "Preset: "
+    
+    question_params = if preset do
+      QuestionLib.create_from_preset(question_params)
+    else
+      Map.put(question_params, "options", %{"choices" => []})
+    end
+    
+    question_params = Map.merge(
+      question_params,
+      %{
+        "ordering" => QuestionLib.get_next_ordering(question_params["template_id"]) + 1
+      }
+    )
+
     case Core.create_question(question_params) do
       {:ok, question} ->
         conn
         |> put_flash(:info, "Question created successfully.")
-        |> redirect(to: Routes.question_path(conn, :show, question))
+        |> redirect(to: Routes.template_path(conn, :edit, question.template_id) <> "#questions")
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        render(conn, "new.html", changeset: changeset)
+        errors = cond do
+          question_params["label"] == "" -> ", you need to have a label"
+          true -> ""  
+        end
+        
+        conn
+        |> put_flash(:danger, "Question was not created#{errors}")
+        |> redirect(to: Routes.template_path(conn, :edit, question_params["template_id"]) <> "#questions")
     end
   end
 
