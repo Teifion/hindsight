@@ -41,28 +41,40 @@ defmodule HindsightWeb.Core.QuestionController do
     end
   end
 
-  def show(conn, %{"id" => id}) do
-    question = Core.get_question!(id)
-    render(conn, "show.html", question: question)
-  end
-
   def edit(conn, %{"id" => id}) do
     question = Core.get_question!(id)
     changeset = Core.change_question(question)
-    render(conn, "edit.html", question: question, changeset: changeset)
+    
+    conn
+    |> assign(:question_types, Question.question_types())
+    |> assign(:question, question)
+    |> assign(:changeset, changeset)
+    |> render("edit.html")
   end
 
-  def update(conn, %{"id" => id, "question" => question_params}) do
+  def update(conn, %{"id" => id, "question" => question_params, "options" => options}) do
     question = Core.get_question!(id)
+
+    options = options
+    |> Hindsight.Helper.ModelHelpers.parse_checkboxes([:show_description, :required, :freestyle, :start_hidden])
+    
+    question_params = Map.put(question_params, "options", Map.merge(question.options, options))
 
     case Core.update_question(question, question_params) do
       {:ok, question} ->
+        # TemplateLib.update_max_score(question.template_id)
+        
         conn
         |> put_flash(:info, "Question updated successfully.")
-        |> redirect(to: Routes.question_path(conn, :show, question))
+        |> redirect(to: Routes.template_path(conn, :edit, question.template_id) <> "#questions")
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        render(conn, "edit.html", question: question, changeset: changeset)
+        conn
+        
+        |> assign(:question_types, QuestionLib.question_types())
+        |> assign(:question, question)
+        |> assign(:changeset, changeset)
+        |> render("edit.html")
     end
   end
 

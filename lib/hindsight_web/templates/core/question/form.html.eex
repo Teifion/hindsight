@@ -1,35 +1,334 @@
+<% question = @changeset.data %>
+<% options = question.options || %{} %>
+<% has_options = Enum.member?(["Radio buttons", "Check boxes", "Dropdown", "List builder"], question.question_type) %>
+<% has_objects = Enum.member?(["Object list"], question.question_type) %>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+
 <%= form_for @changeset, @action, fn f -> %>
+  <input type="hidden" name="options[nil]" value="" />
+
   <%= if @changeset.action do %>
     <div class="alert alert-danger">
       <p>Oops, something went wrong! Please check the errors below.</p>
     </div>
   <% end %>
 
-  <%= label f, :label %>
-  <%= text_input f, :label %>
-  <%= error_tag f, :label %>
-
-  <%= label f, :description %>
-  <%= text_input f, :description %>
-  <%= error_tag f, :description %>
-
-  <%= label f, :visible %>
-  <%= checkbox f, :visible %>
-  <%= error_tag f, :visible %>
-
-  <%= label f, :options %>
-  <%= text_input f, :options %>
-  <%= error_tag f, :options %>
-
-  <%= label f, :ordering %>
-  <%= number_input f, :ordering %>
-  <%= error_tag f, :ordering %>
-
-  <%= label f, :question_type %>
-  <%= text_input f, :question_type %>
-  <%= error_tag f, :question_type %>
-
-  <div>
-    <%= submit "Save" %>
+<div class="row">
+  <div class="col-lg-6 col-xl-3 form-input-col">
+    <%= label f, :label, class: "control-label" %>
+    <%= text_input f, :label, class: "form-control" %>
+    <%= error_tag f, :label %>
   </div>
+  
+  <div class="col-lg-6 col-xl-3 form-input-col">
+    <%= label f, :question_type, class: "control-label" %>
+    <%= select f, :question_type, @question_types, class: "form-control" %>
+    <%= error_tag f, :question_type %>
+  </div>
+
+  <div class="col-lg-12 col-xl-6 form-input-col">
+    <%= label f, :description, class: "control-label" %>
+    <%= textarea f, :description, class: "form-control" %>
+    <%= error_tag f, :description %>
+  </div>
+  
+  <%= case question.question_type do %>
+    <% "Header" -> %>
+    <% "HTML" -> %>
+    
+    <% "Small text" -> %>
+      <div class="col-lg-6 col-xl-3 form-input-col">
+        <label for="placeholder" class="control-label">Placeholder text</label>
+        <input type="text" name="options[placeholder]" id="placeholder" value='<%= options["placeholder"] %>' class="form-control" />
+      </div>
+      
+      <div class="col-lg-12 form-input-col">
+        <%=
+          component "checkbox",
+            label: "Required",
+            name: "options[required]",
+            id: "options_required",
+            
+            changes: Map.get(@changeset.changes, :options, %{})["required"],
+            data: @changeset.data.options["required"]
+        %>
+      </div>
+    
+    <% "Large text" -> %>
+      <div class="col-lg-6 col-xl-3 form-input-col">
+        <label for="rows" class="control-label">Rows: </label><br />
+        <input type="text" name="options[rows]" id="rows" value='<%= Map.get(options, "rows", 4) %>' class="form-control" />
+      </div>
+      
+      <div class="col-lg-6 col-xl-3 form-input-col">
+        <label for="placeholder" class="control-label">Placeholder text</label>
+        <input type="text" name="options[placeholder]" id="placeholder" value='<%= options["placeholder"] %>' class="form-control" />
+      </div>
+      
+      <div class="col-lg-12 form-input-col">
+        <%=
+          component "checkbox",
+            label: "Required",
+            name: "options[required]",
+            id: "options_required",
+            
+            changes: Map.get(@changeset.changes, :options, %{})["required"],
+            data: @changeset.data.options["required"]
+        %>
+        
+        <div class="custom-control custom-checkbox mb-3">
+          <input type="checkbox" class="custom-control-input" name="options[show_description]" id="show_description" value="show_description" <%= if options["show_description"] == true, do: 'checked=""' %>/>
+          <label for="show_description" class="custom-control-label"><strong>Show description</strong> (if unchecked the Description starts as hidden and must be manually shown)</label>
+        </div>
+        
+        <div class="custom-control custom-checkbox mb-3">
+          <input type="checkbox" class="custom-control-input" name="options[start_hidden]" id="start_hidden" value="start_hidden" <%= if options["start_hidden"] == true, do: 'checked=""' %>/>
+          <label for="start_hidden" class="custom-control-label"><strong>Start hidden</strong></label>
+        </div>
+      </div>
+    
+    <% "Rich text" -> %>
+      <div class="col-lg-6 col-xl-3 form-input-col">
+        <label for="rows" class="control-label">Rows: </label><br />
+        
+        <input type="text" name="options[rows]" id="rows" value='<%= Map.get(options, "rows", 4) %>' class="form-control" />
+      </div>
+      
+      <div class="col-lg-12 form-input-col">
+        <div class="custom-control custom-checkbox mb-3">
+          <input type="checkbox" class="custom-control-input" name="options[show_description]" id="show_description" value="show_description" <%= if options["show_description"] == true, do: 'checked=""' %>/>
+          <label for="show_description" class="custom-control-label"><strong>Show description</strong> (if unchecked the Description starts as hidden and must be manually shown)</label>
+        </div>
+      </div>
+    
+    <% "Radio buttons" -> %>
+      <div class="col-lg-6 col-xl-3 form-input-col advanced-config">
+        <label for="single_column_class" class="control-label">Single col class</label>
+        <input type="text" name="options[single_column_class]" id="single_column_class" value='<%= options["single_column_class"] %>' class="form-control" placeholder="col-md-3 col-lg-2" />
+      </div>
+      
+      <div class="col-lg-12 form-input-col">
+        <%=
+          component "checkbox",
+            label: "Required",
+            name: "options[required]",
+            id: "options_required",
+            
+            changes: Map.get(@changeset.changes, :options, %{})["required"],
+            data: @changeset.data.options["required"]
+        %>
+        
+        <div class="custom-control custom-checkbox mb-3">
+          <input type="checkbox" class="custom-control-input" name="options[show_description]" id="show_description" value="show_description" <%= if options["show_description"] == true, do: 'checked=""' %>/>
+          <label for="show_description" class="custom-control-label"><strong>Show description</strong> (if unchecked the Description starts as hidden and must be manually shown)</label>
+        </div>
+      </div>
+    
+    <% "Check boxes" -> %>
+      <div class="col-lg-6 col-xl-3 form-input-col advanced-config">
+        <label for="single_column_class" class="control-label">Single col class</label>
+        <input type="text" name="options[single_column_class]" id="single_column_class" value='<%= options["single_column_class"] %>' class="form-control" placeholder="col-md-3 col-lg-2" />
+      </div>
+      
+      <div class="col-lg-12 form-input-col">
+        <%=
+          component "checkbox",
+            label: "Required",
+            name: "options[required]",
+            id: "options_required",
+            
+            changes: Map.get(@changeset.changes, :options, %{})["required"],
+            data: @changeset.data.options["required"]
+        %>
+        
+        <div class="custom-control custom-checkbox mb-3">
+          <input type="checkbox" class="custom-control-input" name="options[show_description]" id="show_description" value="show_description" <%= if options["show_description"] == true, do: 'checked=""' %>/>
+          <label for="show_description" class="custom-control-label"><strong>Show description</strong> (if unchecked the Description starts as hidden and must be manually shown)</label>
+        </div>
+      </div>
+  
+      
+    
+    <% "Number" -> %>
+      <div class="col-lg-6 col-xl-3 form-input-col">
+        <label for="placeholder" class="control-label">Placeholder text</label>
+        <input type="text" name="options[placeholder]" id="placeholder" value='<%= options["placeholder"] %>' class="form-control" />
+      </div>
+      
+      <div class="col-lg-6 col-xl-3 form-input-col">
+        <label for="format" class="control-label">Format</label>
+        <%= select :options, :format, ["Decimal", "Integer"], selected: options["format"], class: "form-control" %>
+      </div>
+      
+      <div class="col-lg-12 form-input-col">
+        <%=
+          component "checkbox",
+            label: "Required",
+            name: "options[required]",
+            id: "options_required",
+            
+            changes: Map.get(@changeset.changes, :options, %{})["required"],
+            data: @changeset.data.options["required"]
+        %>
+        
+        <div class="custom-control custom-checkbox mb-3">
+          <input type="checkbox" class="custom-control-input" name="options[show_description]" id="show_description" value="show_description" <%= if options["show_description"] == true, do: 'checked=""' %>/>
+          <label for="show_description" class="custom-control-label"><strong>Show description</strong> (if unchecked the Description starts as hidden and must be manually shown)</label>
+        </div>
+      </div>
+      
+    <% "Dropdown" -> %>
+      <div class="col-lg-12 form-input-col">
+        <%=
+          component "checkbox",
+            label: "Required",
+            name: "options[required]",
+            id: "options_required",
+            
+            changes: Map.get(@changeset.changes, :options, %{})["required"],
+            data: @changeset.data.options["required"]
+        %>
+        
+        <div class="custom-control custom-checkbox mb-3">
+          <input type="checkbox" class="custom-control-input" name="options[show_description]" id="show_description" value="show_description" <%= if options["show_description"] == true, do: 'checked=""' %>/>
+          <label for="show_description" class="custom-control-label"><strong>Show description</strong> (if unchecked the Description starts as hidden and must be manually shown)</label>
+        </div>
+      </div>
+      
+    <% "List builder" -> %>
+      <div class="col-lg-12 form-input-col">
+        <%=
+          component "checkbox",
+            label: "Required",
+            name: "options[required]",
+            id: "options_required",
+            
+            changes: Map.get(@changeset.changes, :options, %{})["required"],
+            data: @changeset.data.options["required"]
+        %>
+        
+        <div class="custom-control custom-checkbox mb-3">
+          <input type="checkbox" class="custom-control-input" name="options[show_description]" id="show_description" value="show_description" <%= if options["show_description"] == true, do: 'checked=""' %>/>
+          <label for="show_description" class="custom-control-label"><strong>Show description</strong> (if unchecked the Description starts as hidden and must be manually shown)</label>
+        </div>
+        
+        <div class="custom-control custom-checkbox mb-3">
+          <input type="checkbox" class="custom-control-input" name="options[freestyle]" id="freestyle" value="freestyle" <%= if options["freestyle"] == true, do: 'checked=""' %>/>
+          <label for="freestyle" class="custom-control-label"><strong>Freestyle</strong> (add any option)</label>
+        </div>
+      </div>
+      
+    <% "Object list" -> %>
+      <div class="col-lg-12 form-input-col">
+        <%=
+          component "checkbox",
+            label: "Required",
+            name: "options[required]",
+            id: "options_required",
+            
+            changes: Map.get(@changeset.changes, :options, %{})["required"],
+            data: @changeset.data.options["required"]
+        %>
+        
+        <div class="custom-control custom-checkbox mb-3">
+          <input type="checkbox" class="custom-control-input" name="options[show_description]" id="show_description" value="show_description" <%= if options["show_description"] == true, do: 'checked=""' %>/>
+          <label for="show_description" class="custom-control-label"><strong>Show description</strong> (if unchecked the Description starts as hidden and must be manually shown)</label>
+        </div>
+      </div>
+    
+    <% "Colour" -> %>
+      <div class="col-lg-12 form-input-col">
+        <%=
+          component "checkbox",
+            label: "Required",
+            name: "options[required]",
+            id: "options_required",
+            
+            changes: Map.get(@changeset.changes, :options, %{})["required"],
+            data: @changeset.data.options["required"]
+        %>
+        
+        <div class="custom-control custom-checkbox mb-3">
+          <input type="checkbox" class="custom-control-input" name="options[show_description]" id="show_description" value="show_description" <%= if options["show_description"] == true, do: 'checked=""' %>/>
+          <label for="show_description" class="custom-control-label"><strong>Show description</strong> (if unchecked the Description starts as hidden and must be manually shown)</label>
+        </div>
+      </div>
+    
+    <% "Date" -> %>
+      <div class="col-lg-12 form-input-col">
+        <%=
+          component "checkbox",
+            label: "Required",
+            name: "options[required]",
+            id: "options_required",
+            
+            changes: Map.get(@changeset.changes, :options, %{})["required"],
+            data: @changeset.data.options["required"]
+        %>
+        
+        <div class="custom-control custom-checkbox mb-3">
+          <input type="checkbox" class="custom-control-input" name="options[show_description]" id="show_description" value="show_description" <%= if options["show_description"] == true, do: 'checked=""' %>/>
+          <label for="show_description" class="custom-control-label"><strong>Show description</strong> (if unchecked the Description starts as hidden and must be manually shown)</label>
+        </div>
+      </div>
+    
+    <% "Datetime" -> %>
+      <div class="col-lg-6 col-xl-3 form-input-col">
+        <%=
+          component "checkbox",
+            label: "Required",
+            name: "options[required]",
+            id: "options_required",
+            
+            changes: Map.get(@changeset.changes, :options, %{})["required"],
+            data: @changeset.data.options["required"]
+        %>
+      </div>
+      
+      <div class="col-lg-6 col-xl-3 form-input-col">
+        <div class="custom-control custom-checkbox mb-3">
+          <input type="checkbox" class="custom-control-input" name="options[show_description]" id="show_description" value="show_description" <%= if options["show_description"] == true, do: 'checked=""' %>/>
+          <label for="show_description" class="custom-control-label"><strong>Show description</strong> (if unchecked the Description starts as hidden and must be manually shown)</label>
+        </div>
+      </div>
+    
+    <% _ -> %>
+      <div class="alert alert-danger">
+        <p>
+          <i class="far fa-fw fa-exclamation-triangle"></i>
+          Error: no handler for question type of "<%= question.question_type %>"
+        </p>
+      </div>
+  <% end %>
+
+  <div class="col-lg-6 col-xl-3 form-input-col">
+    <%=
+      component "checkbox",
+        label: "Visible",
+        name: "question[visible]",
+        id: "question_visible",
+        
+        changes: Map.get(@changeset.changes, :visible, nil),
+        data: @changeset.data.visible
+    %>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-lg-12 form-input-col">
+    <a href="<%= Routes.template_path(@conn, :edit, @changeset.data.template_id) %>#questions" class="btn btn-secondary">
+      Cancel
+    </a>
+    
+    <div class="float-right">
+      <span class="btn btn-secondary" onclick="show_advanced_options();" id="show_advanced_button">
+        Show advanced options
+      </span>
+      &nbsp;
+      <%= submit "Save changes", class: "btn btn-info" %>
+    </div>
+  </div>
+</div>
 <% end %>

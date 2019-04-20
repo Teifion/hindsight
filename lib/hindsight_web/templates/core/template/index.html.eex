@@ -1,6 +1,8 @@
 <a href="<%= Routes.template_path(@conn, :new) %>" class="btn btn-primary">New template</a>
 <hr />
 
+<h1>Listing Hindsight templates</h1>
+
 <div class="row section-menu">
   <div class="col-md-12">
     <div class="card border-primary">
@@ -18,14 +20,10 @@
           <tbody>
             <%= for template <- @templates do %>
               <%
-                # c = Hindsight.ColourLib.new(template.colour)
+                c = Hindsight.Helpers.ColourHelper.new(template.colour)
                 
-                # rgba = c |> Hindsight.ColourLib.as_css_style(0.075)
-                # rgb = c |> Hindsight.ColourLib.as_css_style()
-                
-                c = ""
-                rgba = ""
-                rgb = ""
+                rgba = c |> Hindsight.Helpers.ColourHelper.as_css_style(0.075)
+                rgb = c |> Hindsight.Helpers.ColourHelper.as_css_style()
               %>
             
               <tr>

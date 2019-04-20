@@ -1,12 +1,10 @@
 <%
   checked = cond do
-    assigns[:checked] == true -> "checked='checked'"
-    @changes == true -> "checked='checked'"
-    @changes == nil and @data == true -> "checked='checked'"
+    assigns[:checked] == true -> 'checked="checked"'
+    @changes == true -> 'checked="checked"'
+    @changes == nil and @data == true -> 'checked="checked"'
     true -> ""
   end
-  
-  # if @changes == true == true, do: "checked='checked'"
 %>
 <div class="custom-control custom-checkbox mb-3">
   <input name="<%= @name %>" type="hidden" value="false">

@@ -1,5 +1,20 @@
 <h1>Edit Question</h1>
 
-<%= render "form.html", Map.put(assigns, :action, Routes.question_path(@conn, :update, @question)) %>
+<div class="row section-menu">
+  <div class="col-md-12">
+    <div class="card border-primary">
+      <div class="card-body">
 
-<span><%= link "Back", to: Routes.question_path(@conn, :index) %></span>
+        <a href="<%= Routes.template_path(@conn, :edit, @question.template_id) %>#questions" class="btn btn-secondary">
+          <i class="fas fa-fw fa-level-up"></i>
+          Back to template
+        </a>
+
+        <%= render "form.html", Map.put(assigns, :action, Routes.question_path(@conn, :update, @question)) %>
+
+        <%= link "Delete question", to: Routes.question_path(@conn, :delete, @changeset.data.id), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger" %>
+        
+      </div>
+    </div>
+  </div>
+</div>

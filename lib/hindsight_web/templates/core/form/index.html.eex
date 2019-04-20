@@ -1,3 +1,6 @@
+<a href="<%= Routes.form_path(@conn, :new) %>" class="btn btn-primary">New form</a>
+<hr />
+
 <h1>Listing Hindsight forms</h1>
 
 <table>
