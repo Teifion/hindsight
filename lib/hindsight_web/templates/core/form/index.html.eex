@@ -1,35 +1,68 @@
 <a href="<%= Routes.form_path(@conn, :new) %>" class="btn btn-primary">New form</a>
 <hr />
 
-<h1>Listing Hindsight forms</h1>
+<style type="text/css">
+  .icon-summary-icon {
+    padding: 3px 5px;
+    margin: -5px -3px 0;
+    display: inline-block;
+  }
+</style>
 
-<table>
-  <thead>
-    <tr>
-      <th>Reference</th>
-      <th>Completed</th>
-      <th>Completed at</th>
-      <th>Score</th>
+<div class="row section-menu">
+  <div class="col-md-12">
+    <div class="card border-success">
+      <div class="card-body">
 
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-<%= for form <- @hindsight_forms do %>
-    <tr>
-      <td><%= form.reference %></td>
-      <td><%= form.completed %></td>
-      <td><%= form.completed_at %></td>
-      <td><%= form.score %></td>
-
-      <td>
-        <%= link "Show", to: Routes.form_path(@conn, :show, form) %>
-        <%= link "Edit", to: Routes.form_path(@conn, :edit, form) %>
-        <%= link "Delete", to: Routes.form_path(@conn, :delete, form), method: :delete, data: [confirm: "Are you sure?"] %>
-      </td>
-    </tr>
-<% end %>
-  </tbody>
-</table>
-
-<span><%= link "New Form", to: Routes.form_path(@conn, :new) %></span>
+        <h4>
+          Forms - Row count: <%= Enum.count(@hindsight_forms) %>
+        </h4>
+        
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>Template</th>
+              <th>Reference</th>
+              <th>&nbsp;</th>
+              
+              <th>Completed</th>
+              <th>Score</th>
+              
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+        <%= for form <- @hindsight_forms do %>
+            <tr>
+              <td><%= form.template.name %></td>
+              <td><%= form.reference %></td>
+              
+              <td>
+                <div class="icon-summary-icon" style="background-color: <%= form.template.colour %>; color: #FFF;">
+                  <%= component "icon", icon: form.template.icon %>
+                </div>
+              </td>
+              
+              <td><%= if form.completed, do: component("icon", icon: "fas fa-check"), else: "" %></td>
+              <td>
+                <%= if form.score != nil do %>
+                  <%= form.score %>%
+                <% end %>
+              </td>
+              
+              <td>
+                <a href="<%= Routes.form_path(@conn, :show, form) %>" class= "btn btn-secondary btn-sm">
+                  <i class="far fa-fw fa-eye"></i>
+                  View
+                </a>
+              </td>
+            </tr>
+        <% end %>
+          </tbody>
+        </table>
+        
+      </div>
+    </div>
+    
+  </div>
+</div>

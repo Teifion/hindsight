@@ -81,7 +81,7 @@ defmodule Hindsight.Helpers.InputHelper do
     content_tag :div, wrapper_opts do
       label = label(form, field, humanize(field), label_opts)
       input = {:safe, ["<input type='text' name='", field_name, "' value='", existing_value, "' class='form-control datepicker'>"]}
-      error = CentaurWeb.ErrorHelpers.error_tag(form, field)
+      error = HindsightWeb.ErrorHelpers.error_tag(form, field)
       [label, input, error || ""]
     end
   end

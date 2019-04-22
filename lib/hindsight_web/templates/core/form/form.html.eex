@@ -1,27 +1,339 @@
-<%= form_for @changeset, @action, fn f -> %>
+<% opts = Map.get(assigns, :opts, nil) %>
+
+<%= component "icon_dropdown_js", [] %>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+
+<%
+  rich_questions = @template.questions
+  |> Enum.filter(fn q -> q.question_type == "Rich text" end)
+%>
+<%= if Enum.count(rich_questions) > 0 do %>
+<script src='TINYMCE'></script>
+
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    tinymce.init({
+      selector: '.rich-text',
+      font_formats: 'Arial=arial,helvetica,sans-serif;Courier New=courier new,courier,monospace;AkrutiKndPadmini=Akpdmi-n',
+      plugins: [
+    'advlist autolink lists print preview hr',
+    'searchreplace code pagebreak',
+    'insertdatetime media nonbreaking table contextmenu',
+    'emoticons template paste textcolor colorpicker textpattern imagetools codesample help'],
+      toolbar1: 'undo redo | insert | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image',
+      toolbar2: 'fontsizeselect fontselect forecolor backcolor emoticons | codesample help',
+      height: 400
+    });
+  });
+</script>
+<% end %>
+
+
+<%= case @template.options["pagination"] do %>
+  <% "tabs" -> %>
+    <script type="text/javascript" charset="utf-8">
+      $(function() {
+        var selected_tab = window.location.hash.substr(1).replace("_tab", "");
+        $('#question_tabs a:first').tab('show');
+        $('#question_tabs [href="#' + selected_tab + '_tab"]').click();
+      });
+    </script>
+  <% "pages" -> %>
+  
+  
+  <% _ -> %>
+<% end %>
+
+<style type="text/css">
+  label p {
+    margin: 0;
+    padding: 0;
+  }
+  
+  .form-page {
+    display: none;
+  }
+  
+  .form-page-inner {
+    display: none;
+  }
+</style>
+
+<script type="text/javascript" charset="utf-8">
+  var form_warning = true;
+  
+  $(function() {
+    <%= if @template.options["warn_before_leaving"] do %>
+    window.onbeforeunload = function() {
+      if (form_warning) {
+       return "You have made changes on this page that you have not yet confirmed. If you navigate away from this page you will lose your unsaved changes";
+      }
+    }
+    
+    $('form').submit(function() {
+      window.onbeforeunload = null;
+    });
+    <% end %>
+    
+    $('.datepicker').datepicker({
+      format: "dd/mm/yyyy" 
+    });
+    
+    $('.datetimepicker').datetimepicker();
+    $('.question-select').select2({
+      width: "100%"
+    });
+    
+    $('.list-builder-select').select2({
+      width: "100%"
+    });
+    
+    $('.list-builder-freestyle').select2({
+      tags: true,
+      width: "100%"
+    });
+  });
+  
+  function formatTagDropdown (state) {
+    if (state.disabled == true) {
+      return state.text
+    }
+    
+    var data = state.element.dataset;
+    
+    return $(
+      '<span><span style="background-color: ' + data.colour + '; color: #FFF; padding: 2px 5px;"><i class="fa fa-fw ' + data.icon + '"></i></span> &nbsp; ' + state.text + '</span>'
+    );
+  };
+  
+  function change_page(from, to) {
+    $("#page-" + from).hide(200, function () {
+      $("#page-" + to).show(200);
+    });
+    
+  }
+  
+  function add_object_item(q_id) {
+    row_count = $("#obj_list_table_" + q_id + " tr").length - 1;
+    new_row = "<tr id='obj_list_row_" + q_id + "_" + row_count +"'>";
+    
+    var items = $(".obj-list-" + q_id);
+    items.each(function(idx, li) {
+      new_row += "<td>";
+      new_row += "<input type='hidden' value='" + $(li).val() + "' name='form[q_" + q_id + "][" + row_count + "][" + idx + "]' />";
+      // new_row += "form[q_" + q_id + "][" + row_count + "][" + idx + "]";
+      new_row += $(li).val() + "</td>";
+    });
+    
+    new_row += "<td colspan='2'></td>";
+    new_row += "</tr>";
+    
+    // $("#obj_list_table_" + q_id + " .").val("");
+    $(".obj-list-" + q_id).val("");
+    
+    $("#obj_list_last_row_" + q_id).before(new_row);
+  }
+  
+  function remove_last_object_item(q_id) {
+    row_count = $("#obj_list_table_" + q_id + " tr").length - 2;
+    $("#obj_list_row_" + q_id + "_" + row_count).remove();
+  }
+</script>
+
+<%= form_for @changeset, @action, [onsubmit: "on_save();"], fn f -> %>
   <%= if @changeset.action do %>
     <div class="alert alert-danger">
       <p>Oops, something went wrong! Please check the errors below.</p>
     </div>
   <% end %>
-
-  <%= label f, :reference %>
-  <%= text_input f, :reference %>
-  <%= error_tag f, :reference %>
-
-  <%= label f, :completed %>
-  <%= checkbox f, :completed %>
-  <%= error_tag f, :completed %>
-
-  <%= label f, :completed_at %>
-  <%= datetime_select f, :completed_at %>
-  <%= error_tag f, :completed_at %>
-
-  <%= label f, :score %>
-  <%= number_input f, :score %>
-  <%= error_tag f, :score %>
-
-  <div>
-    <%= submit "Save" %>
+  
+  <input type="hidden" name="form[creation_time]" value="<%= assigns[:creation_time] || ymd_hms Timex.now() %>" />
+  <input type="hidden" name="form[template_id]" value="<%= @template.id %>" />
+  
+  <div class="row">
+    <%= if (opts == nil or not Map.get(opts, :hide_ref, false)) do %>
+      <div class="col-md-12 col-lg-6">
+        <label for="form_reference" class="control-label">Reference:</label> (this is for search/retrieval purposes).
+        <%= text_input f, :reference, class: "form-control", required: "required" %>
+        <%= if @changeset.errors[:reference] do %>
+          <span class="help-block">can't be blank</span>
+        <% end %>
+      </div>
+    <% else %>
+      <%= hidden_input f, :ref, class: "form-control" %>
+    <% end %>
   </div>
+  <br />
+  
+  <div id="questions">
+    <%
+      headers = @template.questions
+      |> Enum.filter(fn q -> q.question_type == "Header" end)
+      
+      {revised_questions, _} = @template.questions
+      |> Enum.map_reduce(0, fn (q, block_id) ->
+        new_block_id = if q.question_type == "Header", do: q.id, else: block_id
+        
+        {
+          Map.put(q, :block_id, new_block_id),
+          new_block_id,
+        }
+      end)
+      
+      grouped_questions = revised_questions
+      |> Enum.group_by(fn q -> q.block_id end)
+      
+      blocks = if grouped_questions[0] do
+        [%{id: 0, label: "Questions"}] ++ headers
+      else
+        headers
+      end
+      
+      blocks = blocks
+      |> Enum.with_index
+      |> Enum.map(fn {b, i} -> Map.put(b, :index, i) end)
+      
+      last_block = Enum.count(blocks) - 1
+    %>
+    
+    <%# Template pagination setup %>
+    <%= case @template.options["pagination"] do %>
+      <% "tabs" -> %>
+        <ul class="nav nav-tabs" role="tablist" id="question_tabs">
+          <%= for b <- blocks do %>
+          <li>
+            <a href="#b<%= b.index %>_tab" role="tab" class="nav-link" data-toggle="tab">
+              <%= b.label %>
+            </a>
+          </li>
+          <% end %>
+        </ul>
+        <div class="tab-content">
+      <% "pages" -> %>
+        
+        <script type="text/javascript">
+          $(function() {
+            $("#page-<%= hd(blocks).index %>").show();
+          });
+        </script>
+        
+      <% _ -> %>
+    <% end %>
+    
+    
+    <%# Block loop %>
+    <%= for block <- blocks do %>
+      
+      <%# Question block header %>
+      <%= case @template.options["pagination"] do %>
+        <% "tabs" -> %>
+          <div class="tab-pane" id="b<%= block.index %>_tab" style="min-height: 400px;">
+        <% "pages" -> %>
+          <div class="form-page" id="page-<%= block.index %>">
+        <% _ -> %>
+          
+      <% end %>
+      
+      <div class="row">
+      <%# Actual questions %>
+      <%= for q <- grouped_questions[block.id] do %>
+        <%= if q.visible do %>
+          <%# Question row itself %>
+          <%= render HindsightWeb.Core.QuestionView, "render_form.html",
+            template: @template,
+            question: q,
+            answer: (if @answers[q.id], do: @answers[q.id].value),
+            error: @errors[q.id],
+            conn: @conn
+          %>
+        <% end %>
+      <% end %>
+      <%# END OF QUESTION %>
+      </div>
+      
+      <%# Block footer %>
+      <%= case @template.options["pagination"] do %>
+        <% "tabs" -> %>
+          </div>
+        <% "pages" -> %>
+          <br />
+          
+          <div class="row">
+            <div class="col-md-3">
+              <%= if block.index > 0 do %>
+                <div class="btn btn-success btn-block" onclick="change_page(<%= block.index %>, <%= block.index - 1 %>);">
+                  <i class="fas fa-fw fa-arrow-left"></i>
+                  &nbsp;
+                  Previous page
+                </div>
+              <% end %>
+            </div>
+            
+            <%= if block.index < last_block do %>
+              <div class="offset-md-6 col-md-3">
+                <div class="btn btn-success btn-block" onclick="change_page(<%= block.index %>, <%= block.index + 1 %>);">
+                  Next page
+                  &nbsp;
+                  <i class="fas fa-fw fa-arrow-right"></i>
+                </div>
+              </div>
+              <% else %>
+                <div class="offset-md-3 col-md-3">
+                  <%= submit "Submit form", class: "btn btn-success btn-block" %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+        
+        <% _ -> %>
+      <% end %>
+    
+    <% end %>
+    <%# End of block loop %>
+    
+    <%# Template close pagination %>
+    <%= case @template.options["pagination"] do %>
+      <% "tabs" -> %>
+        </div>
+      <% "pages" -> %>
+      
+      <% _ -> %>
+    <% end %>
+    
+  </div>
+  <br /><br />
+  
+  <%= if opts == nil or not Map.get(opts, :hide_completed_checkbox, false) do %>
+  <h4><label for="form_completed">Completion</label></h4>
+  <div class="row">
+    <div class="col-md-12">
+      <div class="custom-control custom-checkbox mb-3">
+        <input type="checkbox" name="form[completed]" id="form_completed" value="true" <%= if @changeset.data.completed == true, do: 'checked=""' %> class="custom-control-input" />
+        <label for="form_completed" class="custom-control-label">Mark form as completed</label>
+      </div>
+    </div>
+  </div>
+  <% end %>
+  
+  <div class="row page-row">
+    <div class="col-md-3" id="cancel-button-wrapper">
+      <%= if opts == nil or not Map.get(opts, :hide_cancel_button, false) do %>
+        <%= if @changeset.data.id do %>
+          <a href="<%= Routes.form_path(@conn, :show, @changeset.data.id) %>" class="btn btn-secondary btn-block">
+            Cancel
+          </a>
+        <% end %>
+      <% end %>
+    </div>
+    
+    <%= if @template.options["pagination"] != "pages" do %>
+    <div class="offset-md-6 col-md-3" id="submit-button">
+      <%= submit "Submit form", class: "btn btn-success btn-block" %>
+    </div>
+    <% end %>
+  </div>
+  
 <% end %>

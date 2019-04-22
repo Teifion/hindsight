@@ -25,7 +25,7 @@ defmodule HindsightWeb.Core.TemplateController do
       {:ok, template} ->
         conn
         |> put_flash(:info, "Template created successfully.")
-        |> redirect(to: Routes.template_path(conn, :edit, template))
+        |> redirect(to: Routes.template_path(conn, :edit, template) <> "#questions")
 
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, "new.html", changeset: changeset)

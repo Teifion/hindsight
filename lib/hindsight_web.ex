@@ -49,6 +49,15 @@ defmodule HindsightWeb do
       alias HindsightWeb.Router.Helpers, as: Routes
     end
   end
+  
+  def library do
+    quote do
+      alias Hindsight.Repo
+      # import Ecto
+      import Ecto.Query, warn: false
+      alias Ecto.Multi
+    end
+  end
 
   def router do
     quote do

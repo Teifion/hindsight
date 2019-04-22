@@ -127,6 +127,7 @@ defmodule Hindsight.Core do
   end
 
   alias Hindsight.Core.Form
+  alias Hindsight.Core.FormQueries
 
   @doc """
   Returns the list of hindsight_forms.
@@ -137,10 +138,13 @@ defmodule Hindsight.Core do
       [%Form{}, ...]
 
   """
-  def list_hindsight_forms do
-    Repo.all(Form)
+  def list_hindsight_forms(args \\ []) do
+    FormQueries.get_forms
+    # |> FormQueries.search(args[:search])
+    |> FormQueries.preload(args[:joins])
+    |> Repo.all
   end
-
+  
   @doc """
   Gets a single form.
 

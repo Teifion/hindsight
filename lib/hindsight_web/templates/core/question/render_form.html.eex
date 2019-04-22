@@ -1,0 +1,408 @@
+<%
+  q = @question
+  _a = @answer
+  q_id = "q_#{q.id}"
+
+  has_error = (@error != nil)
+  error_list = @error || []
+  eclass = (if has_error, do: "has-error", else: "")
+
+  required = if q.options["required"], do: "required"
+  
+  col_class = if Enum.member?([nil, ""], q.options["bootstrap_col_class"]) do
+    "col-md-12 col-lg-6"
+  else
+    q.options["bootstrap_col_class"]
+  end
+%>
+
+<div class='form-group question-row <%= eclass %> <%= col_class %> <%= q.options["classes"] %>' id="q_<%= q_id %>_group" style='<%= q.options["style"] %>'>
+  
+  <%= case q.question_type do %>
+  
+  <% "Header" -> %>
+    <%= case @template.options["pagination"] do %>
+      <% "tabs" -> %>
+        <h4><%= raw Earmark.as_html! q.label %></h4>
+      <% "pages" -> %>
+        <h4><%= raw Earmark.as_html! q.label %></h4>
+      <% _ -> %>
+        <h4><%= raw Earmark.as_html! q.label %></h4>
+    <% end %>
+  
+    
+  
+  <% "Username" -> %>
+    <label for="<%= q_id %>_input" class="control-label question-label"><%= raw Earmark.as_html! q.label %></label><br />
+    
+    <%= if q.options["show_description"] do %>
+      <div class="question-description">
+        <%= q.description %>  
+      </div>
+    <% end %>
+    
+    
+    <div class="input-group">
+      <span class="input-group-addon btn-info btn" onclick="user_picker('#name_search');">
+        <i class="fa fa-user fa-fw"></i>
+      </span>
+      <input type="text" class="form-control" name="form[<%= q_id %>]" id="<%= q_id %>_input" value="<%= @answer %>" placeholder="" />
+    </div>
+  
+  <% "HTML" -> %>
+    <%= raw q.description %>
+  
+  <% "Small text" -> %>
+    <label for="<%= q_id %>_input" class="control-label question-label"><%= raw Earmark.as_html! q.label %></label><br />
+    
+    <%= if q.options["show_description"] do %>
+      <div class="question-description">
+        <%= q.description %>  
+      </div>
+    <% end %>
+    
+    
+    <input type="text" name="form[<%= q_id %>]" id="<%= q_id %>_input" value="<%= @answer %>" placeholder="" class="form-control" placeholder='<%= q.options["placeholder"] %>' <%= required %> />
+    
+  <% "Large text" -> %>
+    <% hide = q.options["start_hidden"] == true and Enum.member?([nil, ""], @answer) %>
+  
+    <label for="<%= q_id %>_input" class="control-label question-label"><%= raw Earmark.as_html! q.label %></label><br />
+    
+    <%= if hide do %>
+      <span class="btn btn-primary2" onclick='$(this).hide(); $("#large-text-<%= q_id %>-hider").show(500);'>
+        Show textbox
+      </span>
+    <% end %>
+    
+    <div id="large-text-<%= q_id %>-hider" style='<%= if hide, do: "display: none;" %>'>
+      <%= if q.options["show_description"] do %>
+        <div class="question-description">
+          <%= q.description %>  
+        </div>
+      <% end %>
+      
+      <textarea name="form[<%= q_id %>]" id="<%= q_id %>_input" rows='<%= Map.get(q.options, "rows", 4) %>' class="form-control" placeholder='<%= q.options["placeholder"] %>' <%= required %>><%= @answer %></textarea>
+    </div>
+    
+  <% "Rich text" -> %>
+    <label for="<%= q_id %>_input" class="control-label question-label"><%= raw Earmark.as_html! q.label %></label><br />
+    
+    <%= if q.options["show_description"] do %>
+      <div class="question-description">
+        <%= q.description %>  
+      </div>
+    <% end %>
+    
+    <textarea name="form[<%= q_id %>]" id="<%= q_id %>_input" rows='<%= Map.get(q.options, "rows", 12) %>' class="form-control rich-text" placeholder='<%= q.options["placeholder"] %>'><%= @answer %></textarea>
+    
+  <% "Radio buttons" -> %>
+    <%
+      single_column_class = if Enum.member?([nil, ""], q.options["single_column_class"]), do: "col-md-3 col-lg-2", else: q.options["single_column_class"]
+    %>
+    
+    <label class="control-label question-label"><%= raw Earmark.as_html! q.label %></label><br />
+    
+    <%= if q.options["show_description"] do %>
+      <div class="question-description">
+        <%= q.description %>  
+      </div>
+    <% end %>
+    
+    <div class="row">
+      <%= for {choice, i} <- Enum.with_index(q.options["choices"] || []) do %>
+        <% is_selected = (@answer == choice["label"]) %>
+        
+        <div class='<%= single_column_class %>'>
+          <div class="custom-control custom-radio d-block my-2">
+            <input type="radio" id="<%= q_id %>_<%= i %>_input" name="form[<%= q_id %>]" value='<%= choice["label"] %>' class="custom-control-input" <%= if is_selected, do: 'checked=""' %>>
+            <label class="custom-control-label" for="<%= q_id %>_<%= i %>_input"><%= choice["label"] %></label>
+          </div>
+        </div>
+      <% end %>
+    </div>
+    
+  <% "Check boxes" -> %>
+    <%
+      single_column_class = if Enum.member?([nil, ""], q.options["single_column_class"]), do: "col-md-3 col-lg-2", else: q.options["single_column_class"]
+    %>
+    
+    <label class="control-label question-label"><%= raw Earmark.as_html! q.label %></label><br />
+    
+    <%= if q.options["show_description"] do %>
+      <div class="question-description">
+        <%= q.description %>  
+      </div>
+    <% end %>
+    
+    <div class="row">
+      <% answer = @answer || [] %>
+      <% answer = (if is_list(answer), do: answer, else: [answer]) %>
+      
+      <%= for {choice, i} <- Enum.with_index(q.options["choices"] || []) do %>
+        <% is_selected = Enum.member?(answer, choice["label"]) %>
+        
+        <div class='<%= single_column_class %>'>
+          <div class="custom-control custom-checkbox d-block my-2">
+            <input type="checkbox" class="custom-control-input" name="form[<%= q_id %>_<%= i %>]" id="<%= q_id %>_<%= i %>_input" value="<%= choice["label"] %>" <%= if is_selected, do: 'checked=""' %> />
+            <label for="<%= q_id %>_<%= i %>_input" class="custom-control-label question-label"><%= choice["label"] %></label>
+          </div>
+        </div>
+      <% end %>
+    </div>
+    
+  <% "Number" -> %>
+    <label for="<%= q_id %>_input" class="control-label question-label"><%= raw Earmark.as_html! q.label %></label><br />
+    
+    <%= if q.options["show_description"] do %>
+      <div class="question-description">
+        <%= q.description %>  
+      </div>
+    <% end %>
+    
+    <input type="number" step="any" name="form[<%= q_id %>]" id="<%= q_id %>_input" value="<%= @answer %>" placeholder='<%= q.options["placeholder"] %>' class="form-control" <%= required %> />
+    
+  <% "Dropdown" -> %>
+    <label for="<%= q_id %>_input" class="control-label question-label"><%= raw Earmark.as_html! q.label %></label><br />
+    
+    <%= if q.options["show_description"] do %>
+      <div class="question-description">
+        <%= q.description %>  
+      </div>
+    <% end %>
+    
+    <select class="form-control question-select" name="form[<%= q_id %>]" id="<%= q_id %>_input">
+      <%= if q.options["required"] == nil do %>
+        <option value=""></option>
+      <% end %>
+      <%= for choice <- q.options["choices"] || [] do %>
+        <% is_selected = (@answer == choice["label"]) %>
+        <option value="<%= choice["label"] %>" <%= if is_selected, do: raw "selected=''" %>><%= choice["label"] %></option>
+      <% end %>
+    </select>
+  
+  <% "List builder" -> %>
+    <% answer = @answer || [] %>
+    <% field_class = (if q.options["freestyle"], do: "freestyle", else: "select") %>
+    
+    <%= if q.options["show_description"] do %>
+      <div class="question-description">
+        <%= q.description %>  
+      </div>
+    <% end %>
+    
+    <label for="<%= q_id %>_input" class="control-label question-label"><%= raw Earmark.as_html! q.label %></label><br />
+    <select class="form-control list-builder-<%= field_class %>" multiple="multiple" name="form[<%= q_id %>][]" id="<%= q_id %>_input">
+      <%= for choice <- q.options["choices"] || [] do %>
+        <% is_selected = Enum.member?(answer, choice["label"]) %>
+        <option value="<%= choice["label"] %>" <%= if is_selected, do: raw "selected=''" %>><%= choice["label"] %></option>
+      <% end %>
+    </select>
+  
+  <% "Object list" -> %>
+    <script type="text/javascript" charset="utf-8">
+      $(function() {
+        $(".obj-list-<%= q.id %>").keydown(function(e) {
+          if (e.keyCode == 13) {
+            add_object_item(<%= q.id %>);
+            e.stopPropagation();
+            e.preventDefault();
+            return true;
+          }
+        });
+      });
+    </script>
+    
+    <% choices = q.options["choices"] || [] %>
+    <label for="<%= q_id %>_input" class="control-label question-label"><%= raw Earmark.as_html! q.label %></label><br />
+    
+    <%= if q.options["show_description"] do %>
+      <div class="question-description">
+        <%= q.description %>  
+      </div>
+    <% end %>
+    
+    <table class="table" id="obj_list_table_<%= q.id %>">
+      <thead>
+        <tr>
+          <%= for c <- choices do %>
+            <th><%= c["label"] %></th>
+          <% end %>
+          <th>&nbsp;</th>
+        </tr>
+      </thead>
+      <tbody>
+        <%
+          answer = cond do
+            @answer == nil -> []
+            @answer == [] -> [] 
+            is_list(@answer) -> @answer
+           true -> @answer["value"]
+          end
+        %>
+        <% choices = q.options["choices"] || [] %>
+        
+        <%= if answer != [] and choices != [] do %>
+          <%= for {a, ai} <- Enum.with_index(answer) do %>
+            <tr id='obj_list_row_<%= @question.id %>_<%= ai + 1 %>'>
+              <%= for {c, ci} <- Enum.with_index(choices) do %>
+                <td>
+                  <input type='hidden' value='<%= a[c["label"]] %>' name='form[<%= q_id %>][<%= ai %>][<%= ci %>]' />
+                  <%= a[c["label"]] %>
+                </td>
+              <% end %>
+              <td colspan='2'>&nbsp;</td>
+            </tr>
+          <% end %>
+        <% end %>
+        
+        
+        <tr id="obj_list_last_row_<%= q.id %>">
+          <%= for {c, i} <- Enum.with_index(choices) do %>
+            <td>
+            <%= case c["type"] do %>
+              <% "Text" -> %>
+                <input type="text" id="<%= q.id %>_obj_<%= i %>" value="" placeholder="" class="form-control obj-list-<%= q.id %>" />
+              
+              <% "Number" -> %>
+                <input type="number" step="any" id="<%= q.id %>_obj_<%= i %>" value="" placeholder="" class="form-control obj-list-<%= q.id %>" />
+              
+              <% "Date" -> %>
+                <input type="text" id="<%= q.id %>_obj_<%= i %>" value="" class="form-control datepicker obj-list-<%= q.id %>" />
+              
+              <% "Dropdown" -> %>
+                <select name="" id="<%= q.id %>_obj_<%= i %>" class="form-control obj-list-<%= q.id %>">
+                  <%= for o <- c["options"] do %>
+                    <option value="<%= o %>"><%= o %></option>
+                  <% end %>
+                </select>
+            <% end %>
+            </td>
+          <% end %>
+          <td>
+            <span class="btn btn-success btn-block" onclick="add_object_item(<%= q.id %>);">
+              <i class="far fa-fw fa-plus"></i>
+            </span>
+          </td>
+          <td>
+            <span class="btn btn-danger btn-block" onclick="remove_last_object_item(<%= q.id %>);">
+              <%# <i class="far fa-fw fa-trash"></i> %>
+              Delete last
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  
+  <% "Date" -> %>
+    <label for="<%= q_id %>_input" class="control-label question-label"><%= raw Earmark.as_html! q.label %></label><br />
+    
+    <%= if q.options["show_description"] do %>
+      <div class="question-description">
+        <%= q.description %>  
+      </div>
+    <% end %>
+    
+    <input type="text" name="form[<%= q_id %>]" id="<%= q_id %>_input" value="<%= @answer %>" placeholder="" class="datepicker form-control" />
+    
+  <% "Datetime" -> %>
+    <label for="<%= q_id %>_input" class="control-label question-label"><%= raw Earmark.as_html! q.label %></label><br />
+    
+    <%= if q.options["show_description"] do %>
+      <div class="question-description">
+        <%= q.description %>  
+      </div>
+    <% end %>
+    
+    <input type="text" name="form[<%= q_id %>]" id="<%= q_id %>_input" value="<%= @answer %>" placeholder="" class="datetimepicker form-control" />
+
+  <% "Colour" -> %>
+    <label for="<%= q_id %>_input" class="control-label question-label"><%= raw Earmark.as_html! q.label %></label><br />
+    <input type="color" name="form[<%= q_id %>]" id="<%= q_id %>_input" value="<%= @answer %>" placeholder='<%= q.options["placeholder"] %>' class="form-control" <%= required %> />
+
+  <% "System link: " <> link_type -> %>
+    <%= case link_type do %>
+      <% "User" -> %>
+        <label for="<%= q_id %>_input" class="control-label question-label"><%= raw Earmark.as_html! q.label %></label><br />
+        
+        <%= if q.options["show_description"] do %>
+          <div class="question-description">
+            <%= q.description %>  
+          </div>
+        <% end %>
+        
+        <%= CentaurWeb.UserHelper.picker_input("form[#{q_id}]", "#{q_id}_input", @answer) %>
+      
+      <% "Bedrock Customer" -> %>
+        <label for="<%= q_id %>_input" class="control-label question-label"><%= raw Earmark.as_html! q.label %></label><br />
+        
+        <%= if q.options["show_description"] do %>
+          <div class="question-description">
+            <%= q.description %>  
+          </div>
+        <% end %>
+        
+        <%= CentaurWeb.Bedrock.CustomerHelper.picker_input("form[#{q_id}]", "#{q_id}_input", @answer) %>
+      
+      <% "Bedrock Policy" -> %>
+        <label for="<%= q_id %>_input" class="control-label question-label"><%= raw Earmark.as_html! q.label %></label><br />
+        
+        <%= if q.options["show_description"] do %>
+          <div class="question-description">
+            <%= q.description %>  
+          </div>
+        <% end %>
+        
+        <%= CentaurWeb.Bedrock.ObjectHelper.picker_input("form[#{q_id}]", "#{q_id}_input", @answer) %>
+      
+      <% "Bedrock Employee" -> %>
+        <label for="<%= q_id %>_input" class="control-label question-label"><%= raw Earmark.as_html! q.label %></label><br />
+        
+        <%= if q.options["show_description"] do %>
+          <div class="question-description">
+            <%= q.description %>  
+          </div>
+        <% end %>
+        
+        <%= CentaurWeb.Bedrock.EmployeeHelper.picker_input("form[#{q_id}]", "#{q_id}_input", @answer) %>
+      
+      
+      <% "Agency Payment" -> %>
+        <label for="<%= q_id %>_input" class="control-label question-label"><%= raw Earmark.as_html! q.label %></label><br />
+        
+        <%= if q.options["show_description"] do %>
+          <div class="question-description">
+            <%= q.description %>  
+          </div>
+        <% end %>
+        
+        <%= CentaurWeb.Agency.CommissionHelper.picker_input("form[#{q_id}]", "#{q_id}_input", @answer) %>
+      
+      
+      <% _ -> %>
+        <div class="alert alert-danger">
+          <p>
+            <i class="far fa-fw fa-exclamation-triangle"></i>
+            <i class="far fa-fw fa-link"></i>
+            Error: no handler for system link question type of "<%= link_type %>"
+          </p>
+        </div>
+        
+        
+    <% end %>
+    <%# End of system link questions %>
+    
+  <% _ -> %>
+    <div class="alert alert-danger">
+      <p>
+        <i class="far fa-fw fa-exclamation-triangle"></i>
+        Error: no handler for question type of "<%= @question.question_type %>"
+      </p>
+    </div>
+    
+  <% end %>
+  
+  <%= for e <- error_list do %>
+    <span class="help-block"><%= e %></span>
+  <% end %>
+</div><!-- form-group -->

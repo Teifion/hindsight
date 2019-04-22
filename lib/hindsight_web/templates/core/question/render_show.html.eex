@@ -1,0 +1,206 @@
+<%
+q = @question
+# a = @answer
+q_id = "q_#{q.id}"
+%>
+
+<div class="form-group question-row" id="q_<%= q_id %>_group">
+  <div class="row">
+    <div class="col-md-12">
+  
+  <%= case q.question_type do %>
+  
+  <% "Header" -> %>
+    <h4><%= q.label %></h4>
+  
+  <% "Username" -> %>
+    <label for="<%= q_id %>_input" class="control-label question-label"><%= q.label %></label><br />
+    <div class="input-group">
+      <span class="input-group-addon btn-info btn" onclick="user_picker('#name_search');">
+        <i class="fa fa-user fa-fw"></i>
+      </span>
+      <input type="text" class="form-control" name="form[<%= q_id %>]" id="<%= q_id %>_input" value="<%= @answer %>" placeholder="" disabled="" />
+    </div>
+  
+  <% "HTML" -> %>
+    <%= raw q.description %>
+  
+  <% "Small text" -> %>
+    <label for="<%= q_id %>_input" class="control-label question-label"><%= q.label %></label><br />
+    <input type="text" name="form[<%= q_id %>]" id="<%= q_id %>_input" value="<%= @answer %>" placeholder="" disabled="" class="form-control" />
+    
+  <% "Large text" -> %>
+    <% hide = q.options["start_hidden"] == true and Enum.member?([nil, ""], @answer) %>
+    
+    <%= if not hide do %>
+      <label for="<%= q_id %>_input" class="control-label question-label"><%= q.label %></label><br />
+      <textarea name="form[<%= q_id %>]" id="<%= q_id %>_input" rows='<%= Map.get(q.options, "rows", 4) %>' class="form-control" disabled=""><%= @answer %></textarea>
+    <% end %>
+    
+  <% "Rich text" -> %>
+    <label for="<%= q_id %>_input" class="control-label question-label"><%= q.label %></label><br />
+    <%= raw @answer %>
+    
+  <% "Radio buttons" -> %>
+    <label class="control-label question-label"><%= q.label %></label><br />
+    
+    <div class="row">
+      <%= for {choice, i} <- Enum.with_index(q.options["choices"] || []) do %>
+        <%
+          is_selected = (@answer == choice["label"])
+          box_style = (if is_selected, do: "color: #000; font-weight: bold;")
+        %>
+        
+        <div class="col-sm-3">
+          <div class="custom-control custom-radio d-block my-2" style="<%= box_style %>">
+            <input type="radio" name="form[<%= q_id %>]" id="<%= q_id %>_<%= i %>_input" value='<%= choice["label"] %>' disabled="" class="custom-control-input" <%= if is_selected, do: 'checked=""' %> />
+            <label for="<%= q_id %>_<%= i %>_input" class="custom-control-label question-label" style='<%= if ! is_selected, do: 'color:#CCC;', else: 'color:#000;' %>'><%= choice["label"] %></label>
+          </div>
+        </div>
+      <% end %>
+    </div>
+    
+  <% "Check boxes" -> %>
+    <label class="control-label question-label"><%= q.label %></label><br />
+    
+    <div class="row">
+      <% answer = @answer || [] %>
+      <% answer = (if is_list(answer), do: answer, else: [answer]) %>
+      
+      <%= for {choice, i} <- Enum.with_index(q.options["choices"] || []) do %>
+        <%
+          is_selected = Enum.member?(answer, choice["label"])
+          box_style = (if is_selected, do: "color: #000; font-weight: bold;")
+        %>
+        
+        <div class="col-sm-3">
+          <div class="custom-control custom-checkbox d-block my-2" style="<%= box_style %>">
+            <input type="checkbox" name="form[<%= q_id %>_<%= i %>]" id="<%= q_id %>_<%= i %>_input" class="custom-control-input" <%= if is_selected, do: "checked=''" %> disabled="">
+            <label for="<%= q_id %>_<%= i %>_input" class="custom-control-label question-label" style='<%= if ! is_selected, do: 'color:#CCC;', else: 'color:#000;' %>'><%= choice["label"] %></label>
+          </div>
+        
+        </div>
+      <% end %>
+    </div>
+    
+  <% "Number" -> %>
+    <label for="<%= q_id %>_input" class="control-label question-label"><%= q.label %></label><br />
+    <input name="form[<%= q_id %>]" id="<%= q_id %>_input" value="<%= format_number @answer %>" placeholder="" class="form-control" disabled="" />
+    
+  <% "Dropdown" -> %>
+    <label for="<%= q_id %>_input" class="control-label question-label"><%= q.label %></label><br />
+    <select class="form-control" name="form[<%= q_id %>]" id="<%= q_id %>_input" disabled="">
+      <option><%= @answer %></option>
+    </select>
+    
+  <% "List builder" -> %>
+    <% answer = @answer || [] %>
+    <%
+      answer = case answer do
+        "" -> []
+        _ -> answer
+      end
+    %>
+    
+    <label for="<%= q_id %>_input" class="control-label question-label"><%= q.label %></label><br />
+    <div class="input-group input-group-show">
+      <span class="input-group-addon" style="text-align: left;">
+        <%= for c <- answer do %>
+          <span class="btn btn-secondary btn-sm">
+            <%= c %>
+          </span>
+        <% end %>
+        &nbsp;
+      </span>
+      <span class="input-group-addon" style="width: 1px;">
+        
+      </span>
+    </div>
+  
+  <% "Object list" -> %>
+    <% answer = (if @answer != "", do: @answer, else: %{"value" => []})["value"] %>
+    <% choices = q.options["choices"] || [] %>
+    
+    <label for="<%= q_id %>_input" class="control-label question-label"><%= q.label %></label><br />
+    <%= if not Enum.member?([[], nil], answer) and choices != [] do %>
+      <table class="table" id="obj_list_table_<%= q.id %>">
+        <thead>
+          <tr>
+            <%= for c <- choices do %>
+              <th><%= c["label"] %></th>
+            <% end %>
+          </tr>
+        </thead>
+        <tbody>
+          <%= for v <- answer do %>
+          <tr>
+            <%= for c <- choices do %>
+              <td><%= v[c["label"]] %></td>
+            <% end %>
+          </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% end %>
+    
+  <% "Date" -> %>
+    <label for="<%= q_id %>_input" class="control-label question-label"><%= q.label %></label><br />
+    <input type="text" name="form[<%= q_id %>]" id="<%= q_id %>_input" value="<%= @answer %>" placeholder="" class="datepicker form-control" disabled="" />
+    
+  <% "Datetime" -> %>
+    <div class="danger">Error: Datetime is not implemented</div>
+  
+  <% "Colour" -> %>
+    <label for="<%= q_id %>_input" class="control-label question-label"><%= q.label %></label><br />
+    <input type="text" name="form[<%= q_id %>]" id="<%= q_id %>_input" value="<%= @answer %>" placeholder="" disabled="" class="form-control" style="background-color: <%= @answer %>; color: #FFF;" />
+  
+  <% "System link: " <> link_type -> %>
+    <%= case link_type do %>
+      <% "User" -> %>
+        <label for="<%= q_id %>_input" class="control-label question-label"><%= q.label %></label><br />
+        <%= CentaurWeb.UserHelper.picker_shower(@conn, @answer) %>
+      
+      <% "Bedrock Customer" -> %>
+        <label for="<%= q_id %>_input" class="control-label question-label"><%= q.label %></label><br />
+        <%= CentaurWeb.Bedrock.CustomerHelper.picker_shower(@conn, @answer) %>
+      
+      <% "Bedrock Policy" -> %>
+        <label for="<%= q_id %>_input" class="control-label question-label"><%= q.label %></label><br />
+        <%= CentaurWeb.Bedrock.ObjectHelper.picker_shower(@conn, @answer) %>
+      
+      <% "Bedrock Employee" -> %>
+        <label for="<%= q_id %>_input" class="control-label question-label"><%= q.label %></label><br />
+        <%= CentaurWeb.Bedrock.EmployeeHelper.picker_shower(@conn, @answer) %>
+      
+      
+      <% "Agency Payment" -> %>
+        <label for="<%= q_id %>_input" class="control-label question-label"><%= q.label %></label><br />
+        <%= CentaurWeb.Agency.CommissionHelper.picker_shower(@conn, @answer) %>
+      
+      
+      <% _ -> %>
+        <div class="alert alert-danger">
+          <p>
+            <i class="far fa-fw fa-exclamation-triangle"></i>
+            <i class="far fa-fw fa-link"></i>
+            Error: no handler for system link question type of "<%= link_type %>"
+          </p>
+        </div>
+        
+        
+    <% end %>
+  
+  
+  <% _ -> %>
+    <div class="alert alert-danger">
+      <p>
+        <i class="far fa-fw fa-exclamation-triangle"></i>
+        Error: no handler for question type of "<%= @question.question_type %>"
+      </p>
+    </div>
+    
+  <% end %>
+  
+    </div>
+  </div>
+</div>

@@ -1,0 +1,72 @@
+<style type="text/css">
+  <%= for template <- @templates do %>
+    #sub-menu-<%= template.id %> {
+      color: <%= template.colour %>
+    }
+    
+    #sub-menu-<%= template.id %>:hover {
+      color: #000;
+    }
+  <% end %>
+</style>
+
+<%= component "icon_dropdown_js", [] %>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+
+<div class="row page-row">
+  <div class="col-md-12 col-lg-12">
+    <div class="card border-success">
+      <div class="card-body">
+        <div class="row" style="display: none;">
+          <div class="col-md-6 offset-md-3">
+        
+        <form action="<%= Routes.form_path(@conn, :new) %>" method="get" class="form-horizontal">
+          <div class="form-group" style="margin: 0 5px;">
+            <%= component "icon_dropdown", %{
+              name: "select[template]",
+              id: "select_template",
+              # insert_blank: %{id: "", name: "All types", icon: "fas fa-th", colour: fg},
+              selected: "",
+              enumerable: @templates
+            } %>
+          </div>
+          <br />
+          
+          <input type="submit" value="Use template" class="btn btn-success float-right" />
+        </form>
+        
+            
+          </div>
+        </div>
+        
+        
+        <h2 style="text-align: center;">Select form type</h2>
+        <div class="row">
+          
+          <%
+            select_url = Routes.form_path(@conn, :new) <> "?select[template]=###"
+          %>
+          
+          <%= for template <- @templates do %>
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-3 menu-card">
+              <div id="mc-<%= template.id %>">
+                <a href='<%= select_url |> String.replace("###", "#{template.id}") %>' id="sub-menu-<%= template.id %>">
+                  <%= component "icon", icon: template.icon, class: "fa-3x" %><br />
+                  <%= template.name %>
+                </a>
+              </div>
+            </div>
+          <% end %>
+        </div>
+        
+        
+      </div>
+    </div>
+    
+  </div>
+</div>
+
+
+

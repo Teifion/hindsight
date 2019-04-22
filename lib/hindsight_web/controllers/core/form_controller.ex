@@ -3,26 +3,110 @@ defmodule HindsightWeb.Core.FormController do
 
   alias Hindsight.Core
   alias Hindsight.Core.Form
+  alias Hindsight.Core.FormLib
+  alias Hindsight.Core.AnswerLib
+  alias Hindsight.Core.QuestionLib
+  import Hindsight.Helpers.TimexHelper, only: [parse_ymd_hms: 1]
+  alias Ecto.Multi
 
   def index(conn, _params) do
-    hindsight_forms = Core.list_hindsight_forms()
+    hindsight_forms = Core.list_hindsight_forms(joins: [:template, :answers])
     render(conn, "index.html", hindsight_forms: hindsight_forms)
   end
-
-  def new(conn, _params) do
+  
+  def new(conn, %{"select" => %{"template" => template_id}}) do
+    template = Core.get_template_joins!(template_id)
     changeset = Core.change_form(%Form{})
-    render(conn, "new.html", changeset: changeset)
+    
+    conn
+    |> assign(:template, template)
+    |> assign(:changeset, changeset)
+    |> assign(:questions, template.questions)
+    |> assign(:errors, %{})
+    |> assign(:answers, %{})
+    |> render("new.html")
+  end
+ 
+  def new(conn, _params) do
+    templates = Core.list_templates()
+    
+    cond do
+      Enum.count(templates) == 0 ->
+        conn
+        |> put_flash(:info, "You don't have any templates, you need to create one before you can fill in a form.")
+        |> redirect(to: Routes.template_path(conn, :new))
+      
+      Enum.count(templates) == 1 ->
+        conn
+        |> redirect(to: Routes.form_path(conn, :new, %{select: %{template: hd(templates).id}}))
+        
+      true ->
+        conn
+        |> assign(:templates, templates)
+        |> render("select.html")
+    end
   end
 
   def create(conn, %{"form" => form_params}) do
-    case Core.create_form(form_params) do
-      {:ok, form} ->
-        conn
-        |> put_flash(:info, "Form created successfully.")
-        |> redirect(to: Routes.form_path(conn, :show, form))
+    template = Core.get_template_joins!(form_params["template_id"])
+    
+    errors = template.questions
+    |> AnswerLib.check_for_errors(form_params)
+    |> Map.new
+    
+    public_guid = if template.options["public_guid"] == "always" do
+      FormLib.create_guid()
+    else
+      nil
+    end
 
-      {:error, %Ecto.Changeset{} = changeset} ->
-        render(conn, "new.html", changeset: changeset)
+    form_params = Map.merge(form_params, %{
+      "template_name" => template.name,
+      "score" => FormLib.score(template, form_params),
+      "completed" => form_params["completed"] == "true",
+      "initial_generation_at" => parse_ymd_hms(form_params["creation_time"]),
+      "completion_generation_at" => (if form_params["completed"] == "true", do: parse_ymd_hms(form_params["creation_time"])),
+      "public_guid" => public_guid,
+    })
+    
+    
+    form_changeset = Form.changeset(%Form{}, form_params)
+    
+    if errors != %{} or form_changeset.valid? == false do
+      IO.puts ""
+      IO.inspect errors
+      IO.puts ""
+      
+      IO.puts ""
+      IO.inspect form_changeset
+      IO.puts ""
+      
+      answers = %{}
+      |> AnswerLib.merge_answers(template.questions, form_params)
+      
+      conn
+      |> assign(:answers, answers)
+      |> assign(:errors, errors)
+      |> assign(:template, template)
+      |> assign(:changeset, form_changeset)
+      |> assign(:creation_time, parse_ymd_hms(form_params["creation_time"]))
+      |> put_flash(:danger, "Form not created, there are one or more errors.")
+      |> render("new.html")
+      
+    else
+      multi = Multi.new
+      |> Multi.insert(:hindsight_forms, form_changeset)
+      |> AnswerLib.save_answers(template, form_changeset, form_params)
+      
+      case Core.create_form(form_params) do
+        {:ok, form} ->
+          conn
+          |> put_flash(:info, "Form created successfully.")
+          |> redirect(to: Routes.form_path(conn, :show, form))
+
+        {:error, %Ecto.Changeset{} = changeset} ->
+          raise "Unexpected error saving form"
+      end
     end
   end
 
