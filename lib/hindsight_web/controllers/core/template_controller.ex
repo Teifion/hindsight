@@ -33,7 +33,7 @@ defmodule HindsightWeb.Core.TemplateController do
   end
 
   def edit(conn, %{"id" => id}) do
-    template = Core.get_template_joins!(id)
+    template = Core.get_template!(id, joins: [:questions])
     changeset = Core.change_template(template)
 
     conn

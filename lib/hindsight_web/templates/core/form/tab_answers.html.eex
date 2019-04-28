@@ -1,0 +1,44 @@
+<br /><br />
+
+<%= if @template.options["tabbed_questions"] == true do %>
+  <script type="text/javascript" charset="utf-8">
+    $(function() {
+      var selected_tab = window.location.hash.substr(1).replace("_tab", "");
+      $('#answer_tabs a:first').tab('show');
+      $('#answer_tabs [href="#' + selected_tab + '_tab"]').click();
+    });
+  </script>
+  
+  <ul class="nav nav-tabs" role="tablist" id="answer_tabs">
+    <%= for q <- @template.questions do %>
+    <li>
+      <a href="#q<%= q.id %>_tab" role="tab" class="nav-link" data-toggle="tab">
+        <%= q.label %>
+      </a>
+    </li>
+    <% end %>
+  </ul>
+  <div class="tab-content">
+<% end %>
+
+<%= for q <- @template.questions do %>
+  <%= if @template.options["tabbed_questions"] == true do %>
+    <div class="tab-pane" id="q<%= q.id %>_tab">
+  <% end %>
+  
+  <div class="question-row" id="question-row-<%= q.id %>">
+    <%= render HindsightWeb.Core.QuestionView, "render_show.html",
+      question: q,
+      conn: @conn,
+      answer: if @answers[q.id], do: @answers[q.id].value, else: ""
+    %>
+  </div>
+  
+  <%= if @template.options["tabbed_questions"] == true do %>
+    </div>
+  <% end %>
+<% end %>
+
+<%= if @template.options["tabbed_questions"] == true do %>
+  </div>
+<% end %>

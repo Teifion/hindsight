@@ -42,7 +42,6 @@ defmodule Hindsight.Core do
     |> TemplateQueries.search(%{"id": id})
     |> TemplateQueries.search(args[:search])
     |> TemplateQueries.preload(args[:joins])
-    |> limit(1)
     |> Repo.one
   end
 
@@ -149,7 +148,6 @@ defmodule Hindsight.Core do
     |> FormQueries.search(%{"id": id})
     |> FormQueries.search(args[:search])
     |> FormQueries.preload(args[:joins])
-    |> limit(1)
     |> Repo.one
   end
 
@@ -232,7 +230,7 @@ defmodule Hindsight.Core do
   def list_hindsight_questions do
     Repo.all(Question)
   end
-
+  
   @doc """
   Gets a single question.
 

@@ -157,9 +157,6 @@
       <div class="col-md-12 col-lg-6">
         <label for="form_reference" class="control-label">Reference:</label> (this is for search/retrieval purposes).
         <%= text_input f, :reference, class: "form-control", required: "required" %>
-        <%= if @changeset.errors[:reference] do %>
-          <span class="help-block">can't be blank</span>
-        <% end %>
       </div>
     <% else %>
       <%= hidden_input f, :ref, class: "form-control" %>

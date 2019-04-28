@@ -38,10 +38,10 @@
           </a>
         </div>
         
-        <%= if @form.template.use_score do %>
-          <h4><%= @form.template.name %>, score: <%= @form.score %>%</h4>
+        <%= if @template.use_score do %>
+          <h4><%= @template.name %>, score: <%= @form.score %>%</h4>
         <% else %>
-          <h4><%= @form.template.name %></h4>
+          <h4><%= @template.name %></h4>
         <% end %>
         <%= if @form.reference do %>
           <strong>Reference:</strong> <%= @form.reference %>

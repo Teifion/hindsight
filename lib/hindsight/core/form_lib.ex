@@ -3,6 +3,15 @@ defmodule Hindsight.Core.FormLib do
   
   alias Hindsight.Core.Form
   alias Hindsight.Core.QuestionLib
+  alias Hindsight.Core.AnswerLib
+  
+  def save_form(form_changeset, form_params, template) do
+    multi = Multi.new
+    |> Multi.update(:hindsight_forms, form_changeset)
+    |> AnswerLib.save_answers(template, form_changeset, form_params)
+    
+    {:ok, result} = Repo.transaction(multi)
+  end
   
   def score(template, form_params) do
     if template.use_score do

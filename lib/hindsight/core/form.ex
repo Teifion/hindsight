@@ -23,4 +23,10 @@ defmodule Hindsight.Core.Form do
     |> cast(attrs, [:reference, :completed, :completed_at, :score, :template_id])
     |> validate_required([:reference, :completed, :template_id])
   end
+  
+  def update_changeset(form, attrs) do
+    form
+    |> cast(attrs, [:reference, :completed, :completed_at, :score])
+    |> validate_required([:reference, :completed])
+  end
 end

@@ -1,0 +1,11 @@
+<%= component "detail_line",
+  label: "Inserted",
+  value: hms_or_dmy(@form.inserted_at),
+  width: 250
+%>
+
+<%= component "detail_line",
+  label: "Updated",
+  value: hms_or_dmy(@form.updated_at),
+  width: 250
+%>
