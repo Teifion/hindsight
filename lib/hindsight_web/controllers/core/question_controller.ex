@@ -71,7 +71,7 @@ defmodule HindsightWeb.Core.QuestionController do
       {:error, %Ecto.Changeset{} = changeset} ->
         conn
         
-        |> assign(:question_types, QuestionLib.question_types())
+        |> assign(:question_types, Question.question_types())
         |> assign(:question, question)
         |> assign(:changeset, changeset)
         |> render("edit.html")

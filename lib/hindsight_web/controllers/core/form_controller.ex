@@ -10,7 +10,7 @@ defmodule HindsightWeb.Core.FormController do
   alias Ecto.Multi
 
   def index(conn, _params) do
-    hindsight_forms = Core.list_hindsight_forms(joins: [:template, :answers])
+    hindsight_forms = Core.list_hindsight_forms(joins: [:template])
     render(conn, "index.html", hindsight_forms: hindsight_forms)
   end
   
@@ -69,18 +69,9 @@ defmodule HindsightWeb.Core.FormController do
       "public_guid" => public_guid,
     })
     
-    
     form_changeset = Form.changeset(%Form{}, form_params)
     
     if errors != %{} or form_changeset.valid? == false do
-      IO.puts ""
-      IO.inspect errors
-      IO.puts ""
-      
-      IO.puts ""
-      IO.inspect form_changeset
-      IO.puts ""
-      
       answers = %{}
       |> AnswerLib.merge_answers(template.questions, form_params)
       
@@ -111,14 +102,26 @@ defmodule HindsightWeb.Core.FormController do
   end
 
   def show(conn, %{"id" => id}) do
-    form = Core.get_form!(id)
-    render(conn, "show.html", form: form)
+    form = Core.get_form!(id, joins: [:template, :answers])
+    
+    conn
+    |> assign(:form, form)
+    |> render("show.html")
   end
 
   def edit(conn, %{"id" => id}) do
-    form = Core.get_form!(id)
+    form = Core.get_form!(id, joins: [:answers])
+    template = Core.get_template!(id, joins: [:questions])
+    
     changeset = Core.change_form(form)
-    render(conn, "edit.html", form: form, changeset: changeset)
+    
+    conn
+    |> assign(:form, form)
+    |> assign(:template, template)
+    |> assign(:answers, AnswerLib.answer_lookup(form))
+    |> assign(:changeset, changeset)
+    |> assign(:errors, %{})
+    |> render("edit.html")
   end
 
   def update(conn, %{"id" => id, "form" => form_params}) do

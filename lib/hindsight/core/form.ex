@@ -9,6 +9,11 @@ defmodule Hindsight.Core.Form do
     field :score, :integer
     belongs_to :template, Hindsight.Core.Template
 
+    has_many :answers, Hindsight.Core.Answer
+    has_many :answer_lists, Hindsight.Core.AnswerList
+    has_many :answer_maps, Hindsight.Core.AnswerMap
+    has_many :answer_texts, Hindsight.Core.AnswerText
+
     timestamps()
   end
 

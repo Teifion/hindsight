@@ -7,6 +7,7 @@ defmodule Hindsight.Core do
   alias Hindsight.Repo
 
   alias Hindsight.Core.Template
+  alias Hindsight.Core.TemplateQueries
 
   @doc """
   Returns the list of templates.
@@ -21,29 +22,6 @@ defmodule Hindsight.Core do
     Repo.all(Template)
   end
   
-  def get_template_joins!(id) do
-    _template_query()
-    |> _template_preload(:questions)
-    |> _search(:id, id)
-    |> Repo.one!
-  end
-  
-  def _search(query, :id, id) do
-    from templates in query,
-      where: templates.id == ^id
-  end
-  
-  def _template_query() do
-    from templates in Template
-  end
-  
-  def _template_preload(query, :questions) do
-    from templates in query,
-      left_join: questions in assoc(templates, :questions),
-      preload: [questions: questions],
-      order_by: [asc: questions.ordering],
-      order_by: [asc: questions.label]
-  end
 
   @doc """
   Gets a single template.
@@ -59,7 +37,14 @@ defmodule Hindsight.Core do
       ** (Ecto.NoResultsError)
 
   """
-  def get_template!(id), do: Repo.get!(Template, id)
+  def get_template!(id, args \\ []) do
+    TemplateQueries.get_templates
+    |> TemplateQueries.search(%{"id": id})
+    |> TemplateQueries.search(args[:search])
+    |> TemplateQueries.preload(args[:joins])
+    |> limit(1)
+    |> Repo.one
+  end
 
   @doc """
   Creates a template.
@@ -134,13 +119,13 @@ defmodule Hindsight.Core do
 
   ## Examples
 
-      iex> list_hindsight_forms()
+      iex> list_forms()
       [%Form{}, ...]
 
   """
-  def list_hindsight_forms(args \\ []) do
+  def list_forms(args \\ []) do
     FormQueries.get_forms
-    # |> FormQueries.search(args[:search])
+    |> FormQueries.search(args[:search])
     |> FormQueries.preload(args[:joins])
     |> Repo.all
   end
@@ -159,7 +144,14 @@ defmodule Hindsight.Core do
       ** (Ecto.NoResultsError)
 
   """
-  def get_form!(id), do: Repo.get!(Form, id)
+  def get_form!(id, args \\ []) do
+    FormQueries.get_forms
+    |> FormQueries.search(%{"id": id})
+    |> FormQueries.search(args[:search])
+    |> FormQueries.preload(args[:joins])
+    |> limit(1)
+    |> Repo.one
+  end
 
   @doc """
   Creates a form.

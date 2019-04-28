@@ -2,7 +2,6 @@ defmodule Hindsight.Core.FormQueries do
   use HindsightWeb, :library
   
   alias Hindsight.Core.Form
-  alias Hindsight.Core.QuestionLib
   
   def get_form(form_id) do
     from forms in Form,
@@ -18,16 +17,29 @@ defmodule Hindsight.Core.FormQueries do
     from forms in Form
   end
   
-  @spec search(Ecto.Query.t, atom, String.t() | nil) :: Ecto.Query.t
-  def search(query, _, ""), do: query
-  def search(query, _, nil), do: query
+  @spec search(Ecto.Query.t, Map.t | nil) :: Ecto.Query.t
+  def search(query, nil), do: query
+  def search(query, params) do
+    params
+    |> Enum.reduce(query, fn ({key, value}, query_acc) ->
+      _search(query_acc, key, value)
+    end)
+  end
   
-  def search(query, :ids, form_ids) do
+  def _search(query, _, ""), do: query
+  def _search(query, _, nil), do: query
+  
+  def _search(query, :id, form_id) do
+    from forms in query,
+      where: forms.id == ^form_id
+  end
+  
+  def _search(query, :ids, form_ids) do
     from forms in query,
       where: forms.id in ^form_ids
   end
   
-  def search(query, :simple_search, ref) do
+  def _search(query, :simple_search, ref) do
     ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
     
     from forms in query,
@@ -36,37 +48,37 @@ defmodule Hindsight.Core.FormQueries do
         )
   end
   
-  def search(query, :template_id, template_id) do
+  def _search(query, :template_id, template_id) do
     from forms in query,
       where: forms.template_id == ^template_id
   end
   
-  def search(query, :template_ids, template_ids) do
+  def _search(query, :template_ids, template_ids) do
     from forms in query,
       where: forms.template_id in ^template_ids
   end
   
-  def search(query, :template_names, template_names) do
+  def _search(query, :template_names, template_names) do
     from forms in query,
       where: forms.template_name in ^template_names
   end
   
-  def search(query, :author, author_id) do
+  def _search(query, :author, author_id) do
     from forms in query,
       where: forms.author_id == ^author_id
   end
   
-  def search(query, :groups, groups) do
+  def _search(query, :groups, groups) do
     from forms in query,
       where: (forms.group_id in ^groups) or is_nil(forms.group_id)
   end
   
-  def search(query, :group, group_id) do
+  def _search(query, :group, group_id) do
     from forms in query,
       where: (forms.group_id == ^group_id) or is_nil(forms.group_id)
   end
   
-  def search(query, :feedback, user_id) do
+  def _search(query, :feedback, user_id) do
     from forms in query,
       join: users in assoc(forms, :users),
       join: templates in assoc(forms, :template),
@@ -75,13 +87,16 @@ defmodule Hindsight.Core.FormQueries do
       where: forms.completed == true
   end
 
+
+  def preload(query, nil), do: query
   def preload(query, preloads \\ []) do
-    query = if :template in preloads, do: preload_template(query), else: query
+    query = if :template in preloads, do: _preload_template(query), else: query
+    query = if :answers in preloads, do: _preload_answers(query), else: query
     
     query
   end
   
-  def preload_template(query) do
+  def _preload_template(query) do
     from forms in query,
       join: templates in assoc(forms, :template),
       preload: [template: templates]
@@ -104,7 +119,7 @@ defmodule Hindsight.Core.FormQueries do
       preload: [template: {templates, questions: questions, template_responses: template_responses, template_tags: template_tags}]
   end
   
-  def preload_answers(query) do
+  def _preload_answers(query) do
     from forms in query,
       left_join: answers in assoc(forms, :answers),
       preload: [answers: answers],
