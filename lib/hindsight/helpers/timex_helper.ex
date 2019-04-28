@@ -1,4 +1,7 @@
 defmodule Hindsight.Helpers.TimexHelper do
+  @moduledoc """
+  """
+  
   def convert(timestamp, tz \\ Timex.Timezone.Local.lookup()) do
     new_timestamp = timestamp |> Timex.Timezone.convert(tz)
     
@@ -79,7 +82,8 @@ defmodule Hindsight.Helpers.TimexHelper do
   
   def dmy_text(nil), do: nil
   def dmy_text(the_time) do
-    suffix = Timex.format!(the_time, "{D}")
+    suffix = the_time
+    |> Timex.format!("{D}")
     |> String.to_integer
     |> suffix
     

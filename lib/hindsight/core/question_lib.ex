@@ -1,4 +1,7 @@
 defmodule Hindsight.Core.QuestionLib do
+  @moduledoc false
+  
+  
   use HindsightWeb, :library
   
   alias Hindsight.Core.Question

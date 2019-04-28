@@ -1,4 +1,7 @@
 defmodule Hindsight.Helpers.StringHelper do
+  @moduledoc """
+  """
+  
   def remove_spaces(the_string) do
     the_string
     |> String.replace(" ", "_")
@@ -20,7 +23,7 @@ defmodule Hindsight.Helpers.StringHelper do
   # end
   
   def format_number(nil), do: nil
-  def format_number(%Decimal{} = v), do: Decimal.to_string(v) |> format_number
+  def format_number(%Decimal{} = v), do: v |> Decimal.to_string |> format_number
   def format_number(v) when v < 1000, do: v
   def format_number(v) when is_integer(v) do
     v
@@ -63,9 +66,10 @@ defmodule Hindsight.Helpers.StringHelper do
   def singular(s) do
     first_digit = String.slice(s, 0, 1)
     
-    cond do
-      Enum.member?(~w(a e i o u), String.downcase(first_digit)) -> "an #{s}"
-      true -> "a #{s}"
+    if Enum.member?(~w(a e i o u), String.downcase(first_digit)) do
+      "an #{s}"
+    else
+      "a #{s}"
     end
   end
 end

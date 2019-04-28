@@ -1,4 +1,7 @@
 defmodule Hindsight.Core.FormQueries do
+  @moduledoc false
+  
+  
   use HindsightWeb, :library
   
   alias Hindsight.Core.Form

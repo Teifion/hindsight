@@ -29,7 +29,7 @@ defmodule HindsightWeb.Core.FormController do
     templates = Core.list_templates()
     
     cond do
-      Enum.count(templates) == 0 ->
+      Enum.empty?(templates) == 0 ->
         conn
         |> put_flash(:info, "You don't have any templates, you need to create one before you can fill in a form.")
         |> redirect(to: Routes.template_path(conn, :new))
@@ -135,7 +135,8 @@ defmodule HindsightWeb.Core.FormController do
     if errors != %{} do
       changeset = Core.change_form(form)
       
-      answers = AnswerLib.answer_lookup(form)
+      answers = form
+      |> AnswerLib.answer_lookup
       |> AnswerLib.merge_answers(template.questions, form_params)
       
       conn

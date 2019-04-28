@@ -1,4 +1,6 @@
 defmodule Hindsight.Core.Form do
+  @moduledoc false
+  
   use Ecto.Schema
   import Ecto.Changeset
 
@@ -24,6 +26,7 @@ defmodule Hindsight.Core.Form do
     |> validate_required([:reference, :completed, :template_id])
   end
   
+  @doc false
   def update_changeset(form, attrs) do
     form
     |> cast(attrs, [:reference, :completed, :completed_at, :score])

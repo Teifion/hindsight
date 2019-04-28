@@ -1,4 +1,7 @@
 defmodule Hindsight.Core.Question do
+  @moduledoc false
+  
+  
   use Ecto.Schema
   import Ecto.Changeset
 

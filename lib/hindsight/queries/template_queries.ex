@@ -1,4 +1,7 @@
 defmodule Hindsight.Core.TemplateQueries do
+  @moduledoc false
+  
+  
   use HindsightWeb, :library
   
   alias Hindsight.Core.Template

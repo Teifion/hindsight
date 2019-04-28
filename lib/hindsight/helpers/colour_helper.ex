@@ -1,4 +1,7 @@
 defmodule Hindsight.Helpers.ColourHelper do
+  @moduledoc """
+  """
+  
   alias Hindsight.Helpers.ColourHelper
   
   defstruct red: 0,
@@ -64,12 +67,11 @@ defmodule Hindsight.Helpers.ColourHelper do
     |> String.replace("#", "")
     |> String.split("", trim: true)
     
-    [r, rr, g, gg, b, bb] = cond do
-      Enum.count(rgb_list) == 3 ->
+    [r, rr, g, gg, b, bb] = case Enum.count(rgb_list) do
+      3 ->
         [r, g, b] = rgb_list
         [r, r, g, g, b, b]
-      
-      Enum.count(rgb_list) == 6 ->
+      6 -> 
         rgb_list
     end
     
@@ -93,7 +95,8 @@ defmodule Hindsight.Helpers.ColourHelper do
   end
   
   def rgba_css(colour, custom_alpha \\ 0.1) do
-    new(colour)
+    colour
+    |> new
     |> as_css_style(custom_alpha)
   end
 end

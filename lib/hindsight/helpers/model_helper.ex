@@ -1,4 +1,6 @@
 defmodule Hindsight.Helper.ModelHelpers do
+  @moduledoc false
+  
   def parse_checkboxes(params, names) do
     names = Enum.map(names, fn n -> Atom.to_string(n) end)
 

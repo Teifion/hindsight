@@ -1,4 +1,6 @@
 defmodule Hindsight.Core.FormLib do
+  @moduledoc false
+  
   use HindsightWeb, :library
   
   alias Hindsight.Core.QuestionLib
@@ -36,10 +38,10 @@ defmodule Hindsight.Core.FormLib do
         QuestionLib.score_question(q, ans)
       end)
       |> Enum.reduce([0, 1], fn ([pts, mod], [acc_pts, acc_mod]) ->
-        [acc_pts + pts, acc_mod * (mod/100)]
+        [acc_pts + pts, acc_mod * (mod / 100)]
       end)
       
-      max_score = if template.max_score, do: max(template.max_score,1), else: 1
+      max_score = if template.max_score, do: max(template.max_score, 1), else: 1
       
       (points * modifier * 100) / max_score
       |> round
@@ -65,7 +67,7 @@ defmodule Hindsight.Core.FormLib do
       [apoints, amodifier] = QuestionLib.score_question(q, a.value)
       
       new_pts = pts + apoints
-      new_mod = mod * (amodifier/100)
+      new_mod = mod * (amodifier / 100)
       
       row = %{
         label: q.label,

@@ -1,4 +1,7 @@
 defmodule Hindsight.Helpers.InputHelper do
+  @moduledoc """
+  """
+  
   use Phoenix.HTML
   
   import Hindsight.Helpers.TimexHelper

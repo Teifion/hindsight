@@ -30,9 +30,10 @@ defmodule HindsightWeb.Core.QuestionController do
         |> redirect(to: Routes.template_path(conn, :edit, question.template_id) <> "#questions")
 
       {:error, %Ecto.Changeset{} = _changeset} ->
-        errors = cond do
-          question_params["label"] == "" -> ", you need to have a label"
-          true -> ""  
+        errors = if question_params["label"] == "" do
+          ", you need to have a label"
+        else
+          ""
         end
         
         conn
