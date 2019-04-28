@@ -24,10 +24,12 @@ defmodule Hindsight.Core.TemplateQueries do
       where: templates.id == ^template_id
   end
   
+  @spec preload(Ecto.Query.t) :: Ecto.Query.t
+  def preload(query), do: query
   
   @spec preload(Ecto.Query.t, List.t | nil) :: Ecto.Query.t
   def preload(query, nil), do: query
-  def preload(query, preloads \\ []) do
+  def preload(query, preloads) do
     query = if :questions in preloads, do: _preload_questions(query), else: query
     
     query

@@ -3,16 +3,6 @@ defmodule Hindsight.Core.FormQueries do
   
   alias Hindsight.Core.Form
   
-  def get_form(form_id) do
-    from forms in Form,
-      where: forms.id == ^form_id
-  end
-  
-  def get_form_from_guid(form_guid) do
-    from forms in Form,
-      where: forms.public_guid == ^form_guid
-  end
-  
   def get_forms() do
     from forms in Form
   end
@@ -39,57 +29,13 @@ defmodule Hindsight.Core.FormQueries do
       where: forms.id in ^form_ids
   end
   
-  def _search(query, :simple_search, ref) do
-    ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
-    
-    from forms in query,
-      where: (
-            ilike(forms.reference, ^ref_like)
-        )
-  end
   
-  def _search(query, :template_id, template_id) do
-    from forms in query,
-      where: forms.template_id == ^template_id
-  end
+  @spec preload(Ecto.Query.t) :: Ecto.Query.t
+  def preload(query), do: query
   
-  def _search(query, :template_ids, template_ids) do
-    from forms in query,
-      where: forms.template_id in ^template_ids
-  end
-  
-  def _search(query, :template_names, template_names) do
-    from forms in query,
-      where: forms.template_name in ^template_names
-  end
-  
-  def _search(query, :author, author_id) do
-    from forms in query,
-      where: forms.author_id == ^author_id
-  end
-  
-  def _search(query, :groups, groups) do
-    from forms in query,
-      where: (forms.group_id in ^groups) or is_nil(forms.group_id)
-  end
-  
-  def _search(query, :group, group_id) do
-    from forms in query,
-      where: (forms.group_id == ^group_id) or is_nil(forms.group_id)
-  end
-  
-  def _search(query, :feedback, user_id) do
-    from forms in query,
-      join: users in assoc(forms, :users),
-      join: templates in assoc(forms, :template),
-      where: users.id == ^user_id,
-      where: templates.uses_feedback == true,
-      where: forms.completed == true
-  end
-
-
+  @spec preload(Ecto.Query.t, List.t | nil) :: Ecto.Query.t
   def preload(query, nil), do: query
-  def preload(query, preloads \\ []) do
+  def preload(query, preloads) do
     query = if :template in preloads, do: _preload_template(query), else: query
     query = if :answers in preloads, do: _preload_answers(query), else: query
     
@@ -100,23 +46,6 @@ defmodule Hindsight.Core.FormQueries do
     from forms in query,
       join: templates in assoc(forms, :template),
       preload: [template: templates]
-  end
-  
-  def preload_template_with_accesses(query) do
-    from forms in query,
-      left_join: templates in assoc(forms, :template),
-      left_join: accesses in assoc(templates, :accesses),
-      left_join: user_groups in assoc(accesses, :user_group),
-      preload: [template: {templates, accesses: {accesses, user_group: user_groups}}]
-  end
-  
-  def preload_template_for_form(query) do
-    from forms in query,
-      left_join: templates in assoc(forms, :template),
-      left_join: questions in assoc(templates, :questions),
-      left_join: template_responses in assoc(templates, :template_responses),
-      left_join: template_tags in assoc(templates, :template_tags),
-      preload: [template: {templates, questions: questions, template_responses: template_responses, template_tags: template_tags}]
   end
   
   def _preload_answers(query) do

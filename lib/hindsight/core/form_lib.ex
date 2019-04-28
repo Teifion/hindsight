@@ -1,16 +1,27 @@
 defmodule Hindsight.Core.FormLib do
   use HindsightWeb, :library
   
-  alias Hindsight.Core.Form
   alias Hindsight.Core.QuestionLib
   alias Hindsight.Core.AnswerLib
   
-  def save_form(form_changeset, form_params, template) do
+  def insert_form_answers(form_changeset, form_params, template) do
+    multi = Multi.new
+    |> Multi.insert(:hindsight_forms, form_changeset)
+    |> AnswerLib.save_answers(template, form_changeset, form_params)
+    
+    {:ok, result} = Repo.transaction(multi)
+    
+    result
+  end
+  
+  def update_form_answers(form_changeset, form_params, template) do
     multi = Multi.new
     |> Multi.update(:hindsight_forms, form_changeset)
     |> AnswerLib.save_answers(template, form_changeset, form_params)
     
     {:ok, result} = Repo.transaction(multi)
+    
+    result
   end
   
   def score(template, form_params) do

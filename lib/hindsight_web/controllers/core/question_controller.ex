@@ -29,7 +29,7 @@ defmodule HindsightWeb.Core.QuestionController do
         |> put_flash(:info, "Question created successfully.")
         |> redirect(to: Routes.template_path(conn, :edit, question.template_id) <> "#questions")
 
-      {:error, %Ecto.Changeset{} = changeset} ->
+      {:error, %Ecto.Changeset{} = _changeset} ->
         errors = cond do
           question_params["label"] == "" -> ", you need to have a label"
           true -> ""  

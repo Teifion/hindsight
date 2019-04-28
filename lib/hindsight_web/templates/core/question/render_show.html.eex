@@ -154,43 +154,6 @@ q_id = "q_#{q.id}"
     <label for="<%= q_id %>_input" class="control-label question-label"><%= q.label %></label><br />
     <input type="text" name="form[<%= q_id %>]" id="<%= q_id %>_input" value="<%= @answer %>" placeholder="" disabled="" class="form-control" style="background-color: <%= @answer %>; color: #FFF;" />
   
-  <% "System link: " <> link_type -> %>
-    <%= case link_type do %>
-      <% "User" -> %>
-        <label for="<%= q_id %>_input" class="control-label question-label"><%= q.label %></label><br />
-        <%= CentaurWeb.UserHelper.picker_shower(@conn, @answer) %>
-      
-      <% "Bedrock Customer" -> %>
-        <label for="<%= q_id %>_input" class="control-label question-label"><%= q.label %></label><br />
-        <%= CentaurWeb.Bedrock.CustomerHelper.picker_shower(@conn, @answer) %>
-      
-      <% "Bedrock Policy" -> %>
-        <label for="<%= q_id %>_input" class="control-label question-label"><%= q.label %></label><br />
-        <%= CentaurWeb.Bedrock.ObjectHelper.picker_shower(@conn, @answer) %>
-      
-      <% "Bedrock Employee" -> %>
-        <label for="<%= q_id %>_input" class="control-label question-label"><%= q.label %></label><br />
-        <%= CentaurWeb.Bedrock.EmployeeHelper.picker_shower(@conn, @answer) %>
-      
-      
-      <% "Agency Payment" -> %>
-        <label for="<%= q_id %>_input" class="control-label question-label"><%= q.label %></label><br />
-        <%= CentaurWeb.Agency.CommissionHelper.picker_shower(@conn, @answer) %>
-      
-      
-      <% _ -> %>
-        <div class="alert alert-danger">
-          <p>
-            <i class="far fa-fw fa-exclamation-triangle"></i>
-            <i class="far fa-fw fa-link"></i>
-            Error: no handler for system link question type of "<%= link_type %>"
-          </p>
-        </div>
-        
-        
-    <% end %>
-  
-  
   <% _ -> %>
     <div class="alert alert-danger">
       <p>

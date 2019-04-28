@@ -5,9 +5,7 @@ defmodule HindsightWeb.Core.FormController do
   alias Hindsight.Core.Form
   alias Hindsight.Core.FormLib
   alias Hindsight.Core.AnswerLib
-  alias Hindsight.Core.QuestionLib
   import Hindsight.Helpers.TimexHelper, only: [parse_ymd_hms: 1]
-  alias Ecto.Multi
 
   def index(conn, _params) do
     hindsight_forms = Core.list_forms(joins: [:template])
@@ -85,9 +83,7 @@ defmodule HindsightWeb.Core.FormController do
       |> render("new.html")
       
     else
-      multi = Multi.new
-      |> Multi.insert(:hindsight_forms, form_changeset)
-      |> AnswerLib.save_answers(template, form_changeset, form_params)
+      FormLib.insert_form_answers(form_changeset, form_params, template)
       
       case Core.create_form(form_params) do
         {:ok, form} ->
@@ -95,7 +91,7 @@ defmodule HindsightWeb.Core.FormController do
           |> put_flash(:info, "Form created successfully.")
           |> redirect(to: Routes.form_path(conn, :show, form))
 
-        {:error, %Ecto.Changeset{} = changeset} ->
+        {:error, %Ecto.Changeset{} = _changeset} ->
           raise "Unexpected error saving form"
       end
     end
@@ -157,7 +153,7 @@ defmodule HindsightWeb.Core.FormController do
         }
       ))
       
-      FormLib.save_form(form_changeset, form_params, template)
+      FormLib.update_form_answers(form_changeset, form_params, template)
       
       conn
       |> put_flash(:success, "Form updated successfully.")

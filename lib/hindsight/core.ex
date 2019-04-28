@@ -39,7 +39,7 @@ defmodule Hindsight.Core do
   """
   def get_template!(id, args \\ []) do
     TemplateQueries.get_templates
-    |> TemplateQueries.search(%{"id": id})
+    |> TemplateQueries.search(%{id: id})
     |> TemplateQueries.search(args[:search])
     |> TemplateQueries.preload(args[:joins])
     |> Repo.one
@@ -145,7 +145,7 @@ defmodule Hindsight.Core do
   """
   def get_form!(id, args \\ []) do
     FormQueries.get_forms
-    |> FormQueries.search(%{"id": id})
+    |> FormQueries.search(%{id: id})
     |> FormQueries.search(args[:search])
     |> FormQueries.preload(args[:joins])
     |> Repo.one
