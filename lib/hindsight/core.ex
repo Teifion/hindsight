@@ -42,7 +42,7 @@ defmodule Hindsight.Core do
     |> TemplateQueries.search(%{id: id})
     |> TemplateQueries.search(args[:search])
     |> TemplateQueries.preload(args[:joins])
-    |> Repo.one
+    |> Repo.one!
   end
 
   @doc """
@@ -148,7 +148,7 @@ defmodule Hindsight.Core do
     |> FormQueries.search(%{id: id})
     |> FormQueries.search(args[:search])
     |> FormQueries.preload(args[:joins])
-    |> Repo.one
+    |> Repo.one!
   end
 
   @doc """

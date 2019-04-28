@@ -84,26 +84,31 @@ defmodule Hindsight.CoreTest do
     @invalid_attrs %{completed: nil, completed_at: nil, reference: nil, score: nil}
 
     def form_fixture(attrs \\ %{}) do
+      {:ok, template} = %{colour: "some colour", description: "some description", enabled: true, icon: "some icon", max_score: 42, name: "some name", options: %{}, use_score: true}
+      |> Core.create_template()
+      
       {:ok, form} =
         attrs
-        |> Enum.into(@valid_attrs)
+        |> Enum.into(Map.put(@valid_attrs, :template_id, template.id))
         |> Core.create_form()
 
-      form
+      {form, template}
     end
 
-    test "list_hindsight_forms/0 returns all hindsight_forms" do
-      form = form_fixture()
-      assert Core.list_hindsight_forms() == [form]
+    test "list_forms/0 returns all hindsight_forms" do
+      {form, _template} = form_fixture()
+      assert Core.list_forms() == [form]
     end
 
     test "get_form!/1 returns the form with given id" do
-      form = form_fixture()
+      {form, _template} = form_fixture()
       assert Core.get_form!(form.id) == form
     end
 
     test "create_form/1 with valid data creates a form" do
-      assert {:ok, %Form{} = form} = Core.create_form(@valid_attrs)
+      {_form, template} = form_fixture()
+      
+      assert {:ok, %Form{} = form} = Core.create_form(Map.put(@valid_attrs, :template_id, template.id))
       assert form.completed == true
       assert form.completed_at == ~N[2010-04-17 14:00:00]
       assert form.reference == "some reference"
@@ -115,7 +120,7 @@ defmodule Hindsight.CoreTest do
     end
 
     test "update_form/2 with valid data updates the form" do
-      form = form_fixture()
+      {form, _template} = form_fixture()
       assert {:ok, %Form{} = form} = Core.update_form(form, @update_attrs)
       assert form.completed == false
       assert form.completed_at == ~N[2011-05-18 15:01:01]
@@ -124,19 +129,19 @@ defmodule Hindsight.CoreTest do
     end
 
     test "update_form/2 with invalid data returns error changeset" do
-      form = form_fixture()
+      {form, _template} = form_fixture()
       assert {:error, %Ecto.Changeset{}} = Core.update_form(form, @invalid_attrs)
       assert form == Core.get_form!(form.id)
     end
 
     test "delete_form/1 deletes the form" do
-      form = form_fixture()
+      {form, _template} = form_fixture()
       assert {:ok, %Form{}} = Core.delete_form(form)
       assert_raise Ecto.NoResultsError, fn -> Core.get_form!(form.id) end
     end
 
     test "change_form/1 returns a form changeset" do
-      form = form_fixture()
+      {form, _template} = form_fixture()
       assert %Ecto.Changeset{} = Core.change_form(form)
     end
   end
@@ -213,8 +218,8 @@ defmodule Hindsight.CoreTest do
   describe "hindsight_answer_lists" do
     alias Hindsight.Core.AnswerList
 
-    @valid_attrs %{value: []}
-    @update_attrs %{value: []}
+    @valid_attrs %{value: [], form_id: 1, question_id: 1}
+    @update_attrs %{value: [], form_id: 1, question_id: 1}
     @invalid_attrs %{value: nil}
 
     def answer_list_fixture(attrs \\ %{}) do
@@ -272,8 +277,8 @@ defmodule Hindsight.CoreTest do
   describe "hindsight_answer_maps" do
     alias Hindsight.Core.AnswerMap
 
-    @valid_attrs %{value: %{}}
-    @update_attrs %{value: %{}}
+    @valid_attrs %{value: %{}, form_id: 1, question_id: 1}
+    @update_attrs %{value: %{}, form_id: 1, question_id: 1}
     @invalid_attrs %{value: nil}
 
     def answer_map_fixture(attrs \\ %{}) do
@@ -331,8 +336,8 @@ defmodule Hindsight.CoreTest do
   describe "hindsight_answer_texts" do
     alias Hindsight.Core.AnswerText
 
-    @valid_attrs %{value: "some value"}
-    @update_attrs %{value: "some updated value"}
+    @valid_attrs %{value: "some value", form_id: 1, question_id: 1}
+    @update_attrs %{value: "some updated value", form_id: 1, question_id: 1}
     @invalid_attrs %{value: nil}
 
     def answer_text_fixture(attrs \\ %{}) do
@@ -390,8 +395,8 @@ defmodule Hindsight.CoreTest do
   describe "hindsight_answers" do
     alias Hindsight.Core.Answer
 
-    @valid_attrs %{value: "some value"}
-    @update_attrs %{value: "some updated value"}
+    @valid_attrs %{value: "some value", form_id: 1, question_id: 1}
+    @update_attrs %{value: "some updated value", form_id: 1, question_id: 1}
     @invalid_attrs %{value: nil}
 
     def answer_fixture(attrs \\ %{}) do
